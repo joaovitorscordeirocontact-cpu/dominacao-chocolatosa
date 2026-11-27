@@ -1,0 +1,20 @@
+{
+  "stage": { "width": 640, "height": 740, "bodyX": 69, "bodyY": 150, "bodyWidth": 498, "bodyHeight": 576 },
+  "items": {
+    "coroa": { "cx": 253, "top": -78, "width": 192, "ratio": 0.7553, "z": 7 },
+    "chapeu-chef": { "cx": 253, "top": -122, "width": 256, "ratio": 0.8285, "z": 7 },
+    "bone": { "cx": 240, "top": -76, "width": 312, "ratio": 0.7301, "z": 7 },
+    "cartola": { "cx": 253, "top": -145, "width": 264, "ratio": 0.8, "z": 7 },
+    "aureola": { "cx": 253, "top": -118, "width": 220, "ratio": 0.4563, "z": 9 },
+    "cabelo-longo": { "cx": 253, "top": -40, "width": 504, "ratio": 0.945, "z": 6 },
+    "topete-loiro": { "cx": 266, "top": -62, "width": 326, "ratio": 0.7143, "z": 6 },
+    "bigode": { "cx": 253, "top": 163, "width": 100, "ratio": 0.348, "z": 4 },
+    "barba": { "cx": 253, "top": 156, "width": 224, "ratio": 0.8025, "z": 3 },
+    "oculos-redondos": { "cx": 253, "top": 99, "width": 298, "ratio": 0.439, "z": 5 },
+    "oculos-escuros": { "cx": 253, "top": 100, "width": 316, "ratio": 0.391, "z": 5 },
+    "monoculo": { "cx": 317, "top": 108, "width": 126, "ratio": 1.3224, "z": 5 },
+    "laco": { "cx": 372, "top": 8, "width": 150, "ratio": 0.7657, "z": 8 },
+    "gravata": { "cx": 253, "top": 262, "width": 150, "ratio": 0.5833, "z": 2 },
+    "capa": { "cx": 253, "top": 244, "width": 424, "ratio": 0.7262, "z": 1 }
+  }
+}
