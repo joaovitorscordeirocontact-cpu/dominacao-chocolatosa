@@ -1,0 +1,191 @@
+"use client";
+
+/* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
+import { useState } from "react";
+import { Mascot } from "@/components/mascot/Mascot";
+import { Avatar } from "@/components/mascot/Avatar";
+import { ActionBar } from "@/components/ui/Screen";
+import { ACCESSORY_GROUPS, BODY_COLORS, NAME_MAX_LENGTH, SLOTS } from "@/lib/catalog";
+import { setAccessory, setProfile } from "@/lib/demo-state";
+import { updateDemo, useDemoState, useHydrated } from "@/lib/store";
+
+export function CharacterEditor() {
+  const { profile } = useDemoState();
+  const hydrated = useHydrated();
+  const [groupId, setGroupId] = useState(ACCESSORY_GROUPS[0].id);
+  const group = ACCESSORY_GROUPS.find((option) => option.id === groupId) ?? ACCESSORY_GROUPS[0];
+  const ready = profile.name.trim().length > 0;
+  const hasAccessories = Object.keys(profile.accessories).length > 0;
+
+  return (
+    <fieldset disabled={!hydrated} className="min-w-0 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-8">
+      <legend className="sr-only">Personalização do mascote</legend>
+
+      {/* Prévia grande, fixa no topo enquanto as opções rolam. */}
+      <div className="sticky top-0 z-20 -mx-4 bg-linear-to-b from-espresso from-75% to-transparent px-4 pt-1 pb-4 md:top-4 md:mx-0 md:self-start md:bg-none md:px-0">
+        <div className="relative mx-auto rounded-3xl bg-espresso">
+          <div className="panel relative flex justify-center overflow-hidden py-2">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-[radial-gradient(55%_55%_at_50%_45%,rgb(245_43_135/0.35),transparent_70%),radial-gradient(70%_16%_at_50%_94%,rgb(239_200_121/0.45),transparent_70%)]"
+            />
+            <div className="relative w-[min(56vw,26svh,15rem)] md:w-[min(100%,56svh,26rem)]">
+              <Mascot look={profile} animated />
+            </div>
+            <div className="absolute bottom-2 left-2 flex flex-col items-center gap-1" aria-hidden="true">
+              <Avatar look={profile} className="size-14" />
+              <span className="rounded-full bg-espresso/80 px-2 text-[0.65rem] font-bold">na lista</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-4">
+        <div className="panel p-4">
+          <label htmlFor="nome" className="mb-2 block font-extrabold">
+            Seu nome
+          </label>
+          <input
+            id="nome"
+            className="field"
+            value={profile.name}
+            maxLength={NAME_MAX_LENGTH}
+            placeholder="Como vão te chamar?"
+            autoComplete="nickname"
+            enterKeyHint="done"
+            onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
+            onChange={(event) => {
+              const name = event.target.value;
+              updateDemo((state) => setProfile(state, { name }));
+            }}
+          />
+        </div>
+
+        <fieldset className="panel p-4">
+          <legend className="sr-only">Cor do corpo</legend>
+          <p className="mb-3 font-extrabold" aria-hidden="true">
+            Cor do corpo
+          </p>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {BODY_COLORS.map((color) => {
+              const selected = profile.color === color.id;
+              return (
+                <button
+                  key={color.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => updateDemo((state) => setProfile(state, { color: color.id }))}
+                  className={`flex min-h-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 text-xs font-bold transition-transform active:scale-95 ${
+                    selected ? "border-gold bg-gold/15" : "border-transparent bg-espresso/60"
+                  }`}
+                >
+                  <span
+                    className="size-9 rounded-full shadow-[inset_0_-6px_8px_rgb(0_0_0/0.35),inset_0_3px_5px_rgb(255_255_255/0.4)] ring-1 ring-cream/50"
+                    style={{ background: color.swatch }}
+                  />
+                  <span>
+                    {selected && <span aria-hidden="true">✓ </span>}
+                    {color.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <div className="panel p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="font-extrabold">Acessórios</h2>
+            <button
+              type="button"
+              className="btn btn-ghost min-h-11! px-3! py-1! text-xs"
+              disabled={!hasAccessories}
+              onClick={() => updateDemo((state) => setProfile(state, { accessories: {} }))}
+            >
+              Tirar tudo
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-espresso/80 p-1">
+            {ACCESSORY_GROUPS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                aria-pressed={option.id === group.id}
+                onClick={() => setGroupId(option.id)}
+                className={`min-h-11 cursor-pointer rounded-full text-sm font-extrabold ${
+                  option.id === group.id ? "bg-pink text-white" : "text-cream/85"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          {group.slots.map((slot) => (
+            <fieldset key={slot} className="mt-4">
+              <legend className="mb-2 text-sm font-bold text-blush">{SLOTS[slot].label} · escolha um ou nenhum</legend>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
+                {[{ id: undefined, label: "Nenhum" }, ...SLOTS[slot].items].map((item) => {
+                  const selected = profile.accessories[slot] === item.id;
+                  return (
+                    <button
+                      key={item.id ?? "nenhum"}
+                      type="button"
+                      aria-pressed={selected}
+                      // Tocar de novo num acessório equipado também o retira.
+                      onClick={() =>
+                        updateDemo((state) => setAccessory(state, slot, selected ? undefined : item.id))
+                      }
+                      className={`relative flex min-h-24 cursor-pointer flex-col items-center justify-between gap-1 rounded-2xl border-2 p-2 text-center text-xs leading-tight font-bold transition-transform active:scale-95 ${
+                        selected ? "border-gold bg-gold/20" : "border-cream/10 bg-cream/8"
+                      }`}
+                    >
+                      <span className="flex h-14 w-full items-center justify-center">
+                        {item.id ? (
+                          <img
+                            src={`/assets/personagem/${item.id}.webp`}
+                            alt=""
+                            loading="lazy"
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        ) : (
+                          <span aria-hidden="true" className="size-10 rounded-full border-3 border-dashed border-cream/40" />
+                        )}
+                      </span>
+                      {item.label}
+                      {selected && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-gold text-[0.7rem] text-espresso"
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </div>
+
+      <ActionBar className="md:col-span-2">
+        {ready ? (
+          <Link href="/fabrica" className="btn btn-primary text-lg">
+            Continuar para a fábrica <span aria-hidden="true">→</span>
+          </Link>
+        ) : (
+          <>
+            <button type="button" className="btn btn-primary text-lg" disabled>
+              Continuar para a fábrica
+            </button>
+            <p className="text-sm font-bold text-blush">Escreva seu nome para continuar.</p>
+          </>
+        )}
+      </ActionBar>
+    </fieldset>
+  );
+}
