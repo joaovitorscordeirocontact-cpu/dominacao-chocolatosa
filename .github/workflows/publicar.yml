@@ -1,11 +1,11 @@
 name: Publicar no GitHub Pages
 
-# Desligado até alguém decidir publicar. Para ligar (ver README):
-#   1. Settings → Pages → Source: "GitHub Actions"
-#      (no plano Free, o repositório precisa ser público);
+# Publica a cada push em main (ver README). Depende de:
+#   1. Settings → Pages → Source: "GitHub Actions";
 #   2. Settings → Secrets and variables → Actions → Variables:
 #      PAGES_ENABLED=true, NEXT_PUBLIC_SUPABASE_URL e
 #      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (somente a chave PUBLICÁVEL).
+# Para pausar a publicação, mude PAGES_ENABLED para false.
 on:
   push:
     branches: [main]

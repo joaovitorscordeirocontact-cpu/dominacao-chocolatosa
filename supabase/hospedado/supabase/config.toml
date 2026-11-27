@@ -11,6 +11,14 @@ project_id = "dominacao-chocolatosa"
 [auth]
 # Participantes entram sem cadastro.
 enable_anonymous_sign_ins = true
+# Endereço publicado. O jogo não usa links de e-mail nem OAuth (a entrada
+# anônima não redireciona), mas este é o destino padrão do Auth.
+site_url = "https://joaovitorscordeirocontact-cpu.github.io/dominacao-chocolatosa/"
+# O desenvolvimento local continua liberado.
+additional_redirect_urls = [
+  "https://joaovitorscordeirocontact-cpu.github.io/dominacao-chocolatosa/**",
+  "http://localhost:3000/**",
+]
 
 [auth.rate_limit]
 # Entradas anônimas por hora e por IP. O padrão (30) não comporta 20-30

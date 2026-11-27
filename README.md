@@ -1,5 +1,7 @@
 # Dominação Chocolatosa · Topa ou Arrisca?
 
+**Jogar:** https://joaovitorscordeirocontact-cpu.github.io/dominacao-chocolatosa/
+
 Jogo presencial de equipes. Cada pessoa participa pelo próprio celular, o
 moderador conduz as etapas e um telão mostra o que é público. A disputa bíblica
 e as cartas continuam **físicas**.
@@ -27,6 +29,7 @@ e as cartas continuam **físicas**.
 | Rota | Quem usa |
 | --- | --- |
 | `/` | Abertura: criar, entrar ou continuar |
+| `/salas/` | Moderador: salas criadas neste aparelho |
 | `/entrar/?sala=CÓDIGO` | Convite |
 | `/sala/?sala=CÓDIGO` | Participante e capitão |
 | `/moderador/?sala=CÓDIGO` | Moderador |
@@ -34,6 +37,30 @@ e as cartas continuam **físicas**.
 
 O papel vem do **banco**. Abrir outra rota ou mudar o endereço não muda o que a
 pessoa pode fazer.
+
+## Sair e apagar salas
+
+- **Sair da sala** não apaga nada. O moderador volta por **Continuar partida**
+  ou **Minhas salas**.
+- **Apagar sala** remove para sempre a partida e os dados dela, para todos. Só
+  quem criou a sala consegue, e o banco confere isso. Funciona no lobby, com a
+  partida em andamento ou encerrada.
+  - Na abertura: **Minhas salas** → **Apagar sala**.
+  - Dentro da sala: **Configurações da sala** → **Apagar sala**.
+
+O sucesso só aparece depois da confirmação do banco. Sem resposta, a sala
+continua na tela e dá para tentar de novo; repetir o pedido não tem efeito extra.
+
+Quem estava na sala vê **Esta sala foi apagada pelo moderador**, mesmo que
+estivesse sem internet na hora. Links e QR codes antigos, em outros aparelhos,
+mostram **Sala não encontrada ou encerrada**. A identidade anônima e o mascote
+são mantidos, e as outras salas não mudam.
+
+Para reconhecer salas apagadas, fica em `dominacao.deleted_rooms` um registro
+mínimo: identificador e código da sala, data e os identificadores anônimos do
+dono e de quem estava nela. Não há nomes nem dados da partida. O código não é
+usado de novo. Os avisos do Realtime (só um número de revisão) são descartados
+pelo próprio Supabase.
 
 ## Executar localmente
 
@@ -85,6 +112,8 @@ salas.
 | Limite de entradas anônimas | **150 por hora por IP** (o padrão é 30) |
 | Realtime | Política em `realtime.messages` (criada pela migração); canal privado |
 | Data API | Schema `dominacao` **não** exposto; acesso só pelas funções `dc_*` |
+| Sem entrar | A única função liberada é `dc_room_gone`, que só responde sobre salas **apagadas** |
+| URLs do Auth | `site_url` é o endereço publicado; redirecionamentos liberados para ele e para `http://localhost:3000` |
 
 As opções globais do painel do Realtime não foram alteradas: o jogo usa canal
 privado, autorizado por RLS. Se quiser impedir canais públicos no projeto
@@ -127,17 +156,20 @@ npm run validar:supabase    # lê .env.local
 ```
 
 Usa só a chave publicável, como o aplicativo. Confere o acesso negado, a
-autorização do canal Realtime e uma partida de 15 rodadas com 4 equipes
-(concorrência, espionagem, pagamento duplicado e conservação). **Cria dados
-reais** (uma sala e 11 usuários anônimos) e imprime o SQL que apaga somente
-eles. Não faz parte do `npm run check`.
+autorização do canal Realtime, uma partida de 15 rodadas com 4 equipes
+(concorrência, espionagem, pagamento duplicado e conservação) e a exclusão de
+salas. **Cria dados reais** (3 salas, que o teste apaga, e 11 usuários
+anônimos) e imprime o SQL que remove somente o que sobrar. Não faz parte do
+`npm run check`.
 
 `supabase db advisors --linked` mostra, como esperado:
 
 - `auth_allow_anonymous_sign_ins` (aviso, 10 políticas): quem joga são usuários
   anônimos. Todas as políticas exigem ser integrante da sala.
-- `rls_enabled_no_policy` (informativo, 4 tabelas secretas): ninguém as lê
+- `rls_enabled_no_policy` (informativo, 5 tabelas fechadas): ninguém as lê
   diretamente.
+- `auth_leaked_password_protection` (aviso): opção para logins com senha, que o
+  jogo não usa.
 
 ### Outro projeto
 
@@ -153,29 +185,49 @@ No plano Free, o limite documentado do Realtime é de 200 conexões simultâneas
 
 ### Limpeza
 
-Nada é apagado automaticamente. Para remover salas antigas (SQL Editor):
+Nada é apagado automaticamente. No dia a dia, use **Apagar sala**. Se o
+moderador perdeu o acesso, dá para remover salas antigas no SQL Editor:
 
 ```sql
 delete from dominacao.rooms where created_at < now() - interval '30 days';
+-- Avisos de salas apagadas há muito tempo (os links delas passam a mostrar a
+-- mensagem só quando alguém tenta entrar, e o código volta a ficar livre).
+delete from dominacao.deleted_rooms where deleted_at < now() - interval '180 days';
 ```
+
+Salas removidas por SQL não geram o aviso de "apagada pelo moderador".
 
 Usuários anônimos antigos ficam em `auth.users`. Num projeto compartilhado, não
 os apague em lote: podem pertencer a outro aplicativo.
 
-## Publicar no GitHub Pages
+## Publicação (GitHub Pages)
 
-O workflow `publicar.yml` fica **desligado** até ser habilitado.
+Publicado em
+https://joaovitorscordeirocontact-cpu.github.io/dominacao-chocolatosa/. O
+repositório é **público** (exigência do Pages no GitHub Free): código, imagens e
+histórico são visíveis a qualquer pessoa.
 
-- No **GitHub Free**, o Pages exige repositório **público** (ou plano Pro). O
-  repositório é privado, e mudar isso é uma decisão sua: o código e as imagens
-  ficariam públicos. Mesmo com Pro e repositório privado, o **site** publicado
-  é acessível a qualquer pessoa.
-- Depois de decidir:
-  1. Settings → Pages → Source: **GitHub Actions**.
-  2. Settings → Secrets and variables → Actions → **Variables**:
-     `PAGES_ENABLED=true`, `NEXT_PUBLIC_SUPABASE_URL` e
-     `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-  3. Rode "Publicar no GitHub Pages" na aba Actions.
+Cada push em `main` roda **Publicar no GitHub Pages** (`publicar.yml`), que
+confere tipos, lint e testes, gera o site estático e publica. Os testes do banco
+rodam em **Verificar**, em paralelo: confira os dois.
+
+| Configuração | Valor |
+| --- | --- |
+| Settings → Pages → Source | GitHub Actions |
+| Variável `PAGES_ENABLED` | `true` (outro valor pausa a publicação) |
+| Variável `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto |
+| Variável `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **somente** a chave publicável |
+
+A chave publicável vai no JavaScript do site; isso é esperado, e quem protege os
+dados são as permissões no banco. Chaves secretas nunca entram no repositório
+nem nas variáveis.
+
+O convite e o QR code usam o endereço em que o moderador está: no site publicado,
+apontam para ele. Uma sala criada em `localhost` pertence à identidade do
+navegador naquele endereço e não aparece em "Minhas salas" do site publicado.
+
+Mudanças de banco precisam ser aplicadas (`supabase db push`) **antes** do push
+do código que depende delas.
 
 O `basePath` é obtido automaticamente. Para conferir localmente um build em
 subpasta:
@@ -262,8 +314,8 @@ final. Para usar um servidor existente, defina `DATABASE_URL`.
 
 | Comando | O que faz |
 | --- | --- |
-| `npm test` | Sincronização, reconexão do canal, textos, convites, mascote e perfil |
-| `npm run test:db` | Regras, permissões, concorrência, idempotência e conservação |
+| `npm test` | Sincronização, reconexão do canal, sala apagada, textos, convites, mascote e perfil |
+| `npm run test:db` | Regras, permissões, concorrência, idempotência, conservação e exclusão de salas |
 | `npm run validar:supabase` | Valida o projeto hospedado (cria dados reais) |
 | `npm run assets` | Regera `public/assets/` (Python 3 e Pillow) |
 
@@ -290,8 +342,8 @@ tests/                   unidade, banco e backend local
   aplicativo tenta de novo e, enquanto isso, consulta o estado periodicamente.
 
 - **Moderador preso à sessão do navegador.** Limpar os dados ou trocar de
-  aparelho perde a moderação da sala, e não há recuperação. Não use janela
-  anônima para moderar.
+  aparelho perde a moderação da sala, inclusive a opção de apagá-la, e não há
+  recuperação (só por SQL). Não use janela anônima para moderar.
 - Um participante que perde a sessão entra como pessoa nova. No lobby, o
   moderador pode remover o registro antigo.
 - **Bigode e barba** cobrem parte do sorriso, e o bigode encosta nos óculos. Eles
