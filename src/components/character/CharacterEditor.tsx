@@ -1,17 +1,14 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import Link from "next/link";
 import { useState } from "react";
-import { Mascot } from "@/components/mascot/Mascot";
 import { Avatar } from "@/components/mascot/Avatar";
+import { Mascot } from "@/components/mascot/Mascot";
 import { ActionBar } from "@/components/ui/Screen";
 import { asset } from "@/lib/assets";
 import { ACCESSORY_GROUPS, BODY_COLORS, HAIR_COLORS, NAME_MAX_LENGTH, SLOT_IDS, SLOTS } from "@/lib/catalog";
-import { setAccessory, setProfile } from "@/lib/demo-state";
 import { accessoryLayers } from "@/lib/mascot-layers";
-import { updateDemo, useDemoState, useHydrated } from "@/lib/store";
-import type { AccessoryId, MascotLook, Profile } from "@/lib/types";
+import type { AccessoryId, AccessorySlot, MascotLook, Profile } from "@/lib/types";
 
 /** Miniatura da peça: cabelo na cor escolhida; capa mostrando o tecido. */
 function thumbnail(id: AccessoryId, look: MascotLook): string {
@@ -21,7 +18,14 @@ function thumbnail(id: AccessoryId, look: MascotLook): string {
 
 const slotOf = (id: AccessoryId) => SLOT_IDS.find((slot) => SLOTS[slot].items.some((item) => item.id === id))!;
 
-function HairColorPicker({ profile }: { profile: Profile }) {
+function wear(profile: Profile, slot: AccessorySlot, id: AccessoryId | undefined): Profile {
+  const accessories = { ...profile.accessories };
+  if (id) accessories[slot] = id;
+  else delete accessories[slot];
+  return { ...profile, accessories };
+}
+
+function HairColorPicker({ profile, onChange }: { profile: Profile; onChange: (profile: Profile) => void }) {
   const hasHair = Boolean(profile.accessories.cabelo);
   return (
     <div className="mt-3" role="group" aria-label="Cor do cabelo">
@@ -37,7 +41,7 @@ function HairColorPicker({ profile }: { profile: Profile }) {
               type="button"
               aria-pressed={selected}
               disabled={!hasHair}
-              onClick={() => updateDemo((state) => setProfile(state, { hairColor: option.id }))}
+              onClick={() => onChange({ ...profile, hairColor: option.id })}
               className={`flex min-h-16 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 text-xs font-bold transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 ${
                 selected ? "border-gold bg-gold/15" : "border-transparent bg-espresso/60"
               }`}
@@ -58,16 +62,27 @@ function HairColorPicker({ profile }: { profile: Profile }) {
   );
 }
 
-export function CharacterEditor() {
-  const { profile } = useDemoState();
-  const hydrated = useHydrated();
+/**
+ * Editor controlado do nome e do mascote. Quem usa decide o que fazer com as
+ * mudanças e qual é a ação principal (`footer`).
+ */
+export function CharacterEditor({
+  profile,
+  onChange,
+  footer,
+  disabled = false,
+}: {
+  profile: Profile;
+  onChange: (profile: Profile) => void;
+  footer: React.ReactNode;
+  disabled?: boolean;
+}) {
   const [groupId, setGroupId] = useState(ACCESSORY_GROUPS[0].id);
   const group = ACCESSORY_GROUPS.find((option) => option.id === groupId) ?? ACCESSORY_GROUPS[0];
-  const ready = profile.name.trim().length > 0;
   const hasAccessories = Object.keys(profile.accessories).length > 0;
 
   return (
-    <fieldset disabled={!hydrated} className="min-w-0 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-8">
+    <fieldset disabled={disabled} className="min-w-0 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-8">
       <legend className="sr-only">Personalização do mascote</legend>
 
       {/* Prévia grande, fixa no topo enquanto as opções rolam. */}
@@ -103,10 +118,7 @@ export function CharacterEditor() {
             autoComplete="nickname"
             enterKeyHint="done"
             onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
-            onChange={(event) => {
-              const name = event.target.value;
-              updateDemo((state) => setProfile(state, { name }));
-            }}
+            onChange={(event) => onChange({ ...profile, name: event.target.value })}
           />
         </div>
 
@@ -123,7 +135,7 @@ export function CharacterEditor() {
                   key={color.id}
                   type="button"
                   aria-pressed={selected}
-                  onClick={() => updateDemo((state) => setProfile(state, { color: color.id }))}
+                  onClick={() => onChange({ ...profile, color: color.id })}
                   className={`flex min-h-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 text-xs font-bold transition-transform active:scale-95 ${
                     selected ? "border-gold bg-gold/15" : "border-transparent bg-espresso/60"
                   }`}
@@ -149,7 +161,7 @@ export function CharacterEditor() {
               type="button"
               className="btn btn-ghost min-h-11! px-3! py-1! text-xs"
               disabled={!hasAccessories}
-              onClick={() => updateDemo((state) => setProfile(state, { accessories: {} }))}
+              onClick={() => onChange({ ...profile, accessories: {} })}
             >
               Tirar tudo
             </button>
@@ -183,9 +195,7 @@ export function CharacterEditor() {
                       type="button"
                       aria-pressed={selected}
                       // Tocar de novo num acessório equipado também o retira.
-                      onClick={() =>
-                        updateDemo((state) => setAccessory(state, slot, selected ? undefined : item.id))
-                      }
+                      onClick={() => onChange(wear(profile, slot, selected ? undefined : item.id))}
                       className={`relative flex min-h-24 cursor-pointer flex-col items-center justify-between gap-1 rounded-2xl border-2 p-2 text-center text-xs leading-tight font-bold transition-transform active:scale-95 ${
                         selected ? "border-gold bg-gold/20" : "border-cream/10 bg-cream/8"
                       }`}
@@ -215,26 +225,13 @@ export function CharacterEditor() {
                   );
                 })}
               </div>
-              {slot === "cabelo" && <HairColorPicker profile={profile} />}
+              {slot === "cabelo" && <HairColorPicker profile={profile} onChange={onChange} />}
             </fieldset>
           ))}
         </div>
       </div>
 
-      <ActionBar className="md:col-span-2">
-        {ready ? (
-          <Link href="/fabrica" className="btn btn-primary text-lg">
-            Continuar para a fábrica <span aria-hidden="true">→</span>
-          </Link>
-        ) : (
-          <>
-            <button type="button" className="btn btn-primary text-lg" disabled>
-              Continuar para a fábrica
-            </button>
-            <p className="text-sm font-bold text-blush">Escreva seu nome para continuar.</p>
-          </>
-        )}
-      </ActionBar>
+      <ActionBar className="md:col-span-2">{footer}</ActionBar>
     </fieldset>
   );
 }

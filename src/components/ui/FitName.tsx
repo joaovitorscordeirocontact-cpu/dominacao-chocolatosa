@@ -27,7 +27,15 @@ export function FitName({ children, className = "", min = 12 }: { children: stri
     if (!box || !text) return;
     let lastKey = "";
 
+    // Sem medida confiável: volta à quebra de linha normal, que nunca estoura.
+    const reset = () => {
+      Object.assign(text.style, { fontSize: "", whiteSpace: "", width: "", maxWidth: "", overflowWrap: "" });
+      lastKey = "";
+    };
+
     const fit = (force = false) => {
+      // Dentro de um painel fechado o navegador devolve larguras que não valem.
+      if (box.checkVisibility && !box.checkVisibility()) return reset();
       const available = box.clientWidth;
       const base = parseFloat(getComputedStyle(box).fontSize);
       const key = `${available}:${base}`;
@@ -44,6 +52,7 @@ export function FitName({ children, className = "", min = 12 }: { children: stri
       text.style.maxWidth = "none";
       text.style.width = "max-content";
       const oneLine = text.offsetWidth;
+      if (!oneLine) return reset();
       if (oneLine > available) {
         const shrunk = Math.floor(((base * available) / oneLine) * 10) / 10;
         if (shrunk >= Math.max(floor, base * COMFORT)) {
@@ -67,16 +76,28 @@ export function FitName({ children, className = "", min = 12 }: { children: stri
     fit(true);
     const observer = new ResizeObserver(() => fit());
     observer.observe(box);
+    // Painéis que abrem depois nem sempre mudam a largura observada: reajusta
+    // quando um <details> acima abre e quando o nome entra na tela.
+    const onToggle = (event: Event) => {
+      if ((event.target as Node).contains(box)) requestAnimationFrame(() => fit(true));
+    };
+    document.addEventListener("toggle", onToggle, true);
+    const visible = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && fit(true));
+    visible.observe(box);
     let alive = true;
     void document.fonts?.ready.then(() => alive && fit(true));
     return () => {
       alive = false;
       observer.disconnect();
+      visible.disconnect();
+      document.removeEventListener("toggle", onToggle, true);
     };
   }, [children, min]);
 
   return (
-    <span ref={outer} className={`block w-full min-w-0 ${className}`}>
+    // `contain: inline-size`: o nome nunca alarga o cartão. Sem isso, um nome
+    // em uma linha empurraria a coluna e a medição acharia que "cabe".
+    <span ref={outer} className={`block w-full min-w-0 [contain:inline-size] ${className}`}>
       <span ref={inner} data-fit-name="" className="inline-block max-w-full text-balance [overflow-wrap:anywhere]">
         {children}
       </span>

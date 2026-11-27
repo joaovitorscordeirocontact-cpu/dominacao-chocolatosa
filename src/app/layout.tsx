@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Dominação Chocolatosa",
-  description: "Topa ou Arrisca? Demonstração local do jogo presencial de equipes.",
+  description: "Topa ou Arrisca? Jogo presencial de equipes.",
 };
 
 export const viewport: Viewport = {

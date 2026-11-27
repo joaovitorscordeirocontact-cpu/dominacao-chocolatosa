@@ -5,7 +5,6 @@ import type {
   BodyColor,
   FactoryModelId,
   HairColor,
-  TeamId,
 } from "./types.ts";
 
 export const BODY_COLORS: { id: BodyColor; label: string; swatch: string }[] = [
@@ -106,12 +105,7 @@ export const BACKGROUNDS: { id: BackgroundId; label: string }[] = [
   { id: "festa-uva", label: "Festa de uva" },
 ];
 
-export const TEAM_IDS: TeamId[] = ["t1", "t2", "t3", "t4"];
+/** Cor de identificação de cada fábrica (sempre acompanhada do número e do nome). */
+export const SLOT_COLORS = ["#ff4b9f", "#5aa9ff", "#5fd584", "#ffc94d"];
 
-/** Cor de identificação de cada equipe (sempre acompanhada do número e do nome). */
-export const TEAM_COLORS: Record<TeamId, string> = {
-  t1: "#ff4b9f",
-  t2: "#5aa9ff",
-  t3: "#5fd584",
-  t4: "#ffc94d",
-};
+export const teamColor = (slot: number) => SLOT_COLORS[(slot - 1) % SLOT_COLORS.length];

@@ -168,6 +168,20 @@
   min-height: 3.25rem;
   font-size: 1.05rem;
 }
+.secondary {
+  border-width: 2px;
+  border-color: var(--color-gold);
+}
+.problem {
+  max-width: 26rem;
+  margin-top: 1rem;
+  border: 1px solid #ff9d9d;
+  border-radius: 1rem;
+  background: rgb(74 18 20 / 0.95);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
 
 /* Celulares baixos em pé: encolhe a moldura para sobrar respiro. */
 @media (max-aspect-ratio: 1/1) and (max-height: 640px) {

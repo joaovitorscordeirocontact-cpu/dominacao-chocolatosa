@@ -36,6 +36,15 @@ body {
     var(--color-espresso);
   background-attachment: fixed;
   -webkit-tap-highlight-color: transparent;
+  /* Nomes digitados podem não ter espaços: quebram em vez de estourar a tela. */
+  overflow-wrap: anywhere;
+}
+
+/* Por padrão, fieldset e select não encolhem abaixo do maior texto. */
+fieldset,
+select {
+  min-width: 0;
+  max-width: 100%;
 }
 
 button,
@@ -44,22 +53,15 @@ label {
   touch-action: manipulation;
 }
 
-/* Nomes digitados podem não ter espaços: nunca estouram nem são cortados. */
-h1,
-h2,
-h3,
-p,
-button {
-  overflow-wrap: anywhere;
-}
-
 :focus-visible {
   outline: 3px solid var(--color-gold);
   outline-offset: 3px;
 }
 
 /* 16px evita o zoom automático do iOS ao focar o campo. */
-input {
+input,
+select,
+textarea {
   font-size: max(16px, 1rem);
 }
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { BigScreen } from "@/components/screen/BigScreen";
+import { ScreenPage } from "./ScreenPage";
 
 export const metadata: Metadata = { title: "Telão · Dominação Chocolatosa" };
 
-export default function TelaoPage() {
-  return <BigScreen />;
+export default function Page() {
+  return <ScreenPage />;
 }

@@ -1,6 +1,6 @@
 import { asset } from "@/lib/assets";
-import Link from "next/link";
 import { ChocolateTide, ChocolateWave } from "@/components/ui/ChocolateWave";
+import { HomeActions } from "./HomeActions";
 import styles from "./opening.module.css";
 
 function Art() {
@@ -32,11 +32,7 @@ export function OpeningScene() {
           </span>
         </h1>
         <p className={styles.subtitle}>Topa ou Arrisca?</p>
-        <div className={styles.actions}>
-          <Link href="/personagem" className={`btn btn-primary ${styles.action}`}>
-            Entrar no jogo <span aria-hidden="true">→</span>
-          </Link>
-        </div>
+        <HomeActions />
       </div>
     </main>
   );
