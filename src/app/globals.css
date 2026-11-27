@@ -101,7 +101,7 @@ input {
 }
 .btn-primary {
   border: 2px solid var(--color-gold);
-  background: linear-gradient(180deg, #ff62ac 0%, var(--color-pink) 48%, #c50f66 100%);
+  background: linear-gradient(180deg, #ff4f9f 0%, #e31774 48%, #bb0c5f 100%);
   color: #fff;
   text-shadow: 0 2px 2px rgb(90 0 40 / 0.55);
   box-shadow:

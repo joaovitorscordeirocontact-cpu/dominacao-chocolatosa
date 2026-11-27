@@ -77,10 +77,10 @@ export function Duel({ stage, teams, tv = false }: { stage: Stage; teams: Team[]
                 <span className={`fundo-${team.background} shrink-0 overflow-hidden rounded-lg ${tv ? "size-[4.4vw]" : "size-10"}`}>
                   <img src={`/assets/fabricas/${team.model}.webp`} alt="" className="size-full object-contain" />
                 </span>
-                <h3 className={`min-w-0 leading-tight font-black ${tv ? "text-[clamp(1rem,1.7vw,2.2rem)]" : "text-xs sm:text-sm"}`}>
+                <p className={`min-w-0 leading-tight font-black ${tv ? "text-[clamp(1rem,1.7vw,2.2rem)]" : "text-xs sm:text-sm"}`}>
                   <span className="block text-[0.7em] text-blush">F{position}</span>
                   <span className="line-clamp-2 break-words">{team.name}</span>
-                </h3>
+                </p>
               </div>
 
               <div className={`flex flex-1 items-center justify-center ${tv ? "py-[2vh]" : "pt-3 pb-3"}`}>

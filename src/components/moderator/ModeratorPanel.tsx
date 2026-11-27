@@ -23,20 +23,20 @@ export function ModeratorPanel() {
   if (!hydrated) return <p className="py-10 text-center font-bold">Carregando…</p>;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-      <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
+      <div className="grid grid-cols-1 gap-4">
         <section className="panel p-4" aria-labelledby="batalha-titulo">
           <h2 id="batalha-titulo" className="text-xl font-black">
             1. Batalha pelas cartas
           </h2>
-          <ul className="mt-3 grid gap-2">
+          <ul className="mt-3 grid grid-cols-1 gap-2">
             {teams.map((team) => {
               const representative = team.participants.find((p) => p.id === battle.representatives[team.id]);
               const confirmed = battle.confirmed[team.id];
               return (
                 <li
                   key={team.id}
-                  className="flex items-center gap-3 rounded-2xl border-l-8 bg-espresso/60 p-2"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border-l-8 bg-espresso/60 p-2"
                   style={{ borderColor: TEAM_COLORS[team.id] }}
                 >
                   {representative ? (
@@ -46,16 +46,16 @@ export function ModeratorPanel() {
                       ?
                     </span>
                   )}
-                  <span className="min-w-0 flex-1">
-                    <strong className="block truncate">{team.name}</strong>
-                    <span className="block truncate text-sm text-cream/80">
+                  <span className="min-w-0 flex-1 basis-32">
+                    <strong className="block leading-tight break-words">{team.name}</strong>
+                    <span className="block text-sm leading-snug text-cream/80">
                       {representative
                         ? `${representative.name} · ${participations(state.participation[representative.id] ?? 0)}`
                         : "Sem representante"}
                     </span>
                   </span>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-1 text-xs font-black ${
+                    className={`ml-auto shrink-0 rounded-full px-2 py-1 text-xs font-black ${
                       confirmed ? "bg-[#5fd584] text-espresso" : "bg-cream/15"
                     }`}
                   >
@@ -103,7 +103,7 @@ export function ModeratorPanel() {
         </section>
       </div>
 
-      <div className="grid gap-4 lg:sticky lg:top-4">
+      <div className="grid grid-cols-1 gap-4 lg:sticky lg:top-4">
         <section className="panel p-3" aria-labelledby="previa-titulo">
           <h2 id="previa-titulo" className="mb-3 text-lg font-black">
             Na mesa agora

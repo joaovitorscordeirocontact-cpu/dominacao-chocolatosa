@@ -81,8 +81,8 @@ export function BigScreen() {
     <div className="relative isolate flex min-h-svh flex-col gap-[1.5vh] px-[2vw] pt-[1.5vh] pb-[max(1vh,env(safe-area-inset-bottom))] lg:h-svh">
       <ChocolateWave className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[11vh] w-full" />
       <header className="text-center">
-        <p className="gold-text text-[clamp(1.1rem,2.2vw,2.8rem)] uppercase">
-          Dominação Chocolatosa <span className="text-pink">· Topa ou Arrisca?</span>
+        <p className="mx-auto w-fit max-w-full rounded-[2rem] border border-gold/40 bg-espresso/90 px-[1.6vw] py-[0.3vh] font-display text-[clamp(1rem,2vw,2.6rem)] text-gold uppercase">
+          Dominação Chocolatosa <span className="text-[#ff5aa6]">· Topa ou Arrisca?</span>
         </p>
         {settings.showAtmosfera && (
           <p className="text-[clamp(0.65rem,0.9vw,1.1rem)] font-extrabold tracking-[0.4em] text-gold uppercase [text-shadow:0_1px_2px_#000,0_0_8px_#000]">

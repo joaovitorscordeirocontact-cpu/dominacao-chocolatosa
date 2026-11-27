@@ -30,8 +30,10 @@ export function CaseBoard({
         const team = teams.find((option) => option.id === owner);
         const position = owner ? TEAM_IDS.indexOf(owner) + 1 : 0;
         const unavailable = Boolean(owner && owner !== activeTeam);
+        // O nome acessível vem do próprio conteúdo: "Maleta 7 F2, com Cacau Real".
         const content = (
           <>
+            <span className="sr-only">Maleta </span>
             <span
               aria-hidden="true"
               className="absolute top-0 left-1/2 h-2.5 w-2/5 -translate-x-1/2 rounded-t-md border-2 border-b-0 border-[#d9a443]"
@@ -49,12 +51,12 @@ export function CaseBoard({
             </span>
             {owner && (
               <span
-                aria-hidden="true"
                 className="absolute -right-1 -bottom-1.5 grid size-5 place-items-center rounded-full border border-cream bg-espresso text-[0.65rem] font-black text-cream"
               >
                 F{position}
               </span>
             )}
+            {team && <span className="sr-only">, com {team.name}</span>}
           </>
         );
         const base = "relative flex h-full min-h-12 w-full flex-col items-stretch";
@@ -68,13 +70,12 @@ export function CaseBoard({
                 }`}
                 disabled={unavailable}
                 aria-pressed={Boolean(owner)}
-                aria-label={`Maleta ${number}${team ? `, com ${team.name}` : ""}`}
                 onClick={() => onPick(number)}
               >
                 {content}
               </button>
             ) : (
-              <div className={base} aria-label={`Maleta ${number}${team ? `, com ${team.name}` : ""}`}>
+              <div className={base}>
                 {content}
               </div>
             )}

@@ -83,9 +83,9 @@ export function DemoControls({ stage, teams }: { stage: Stage; teams: Team[] }) 
       </section>
 
       <section aria-labelledby="inverter-titulo">
-        <h3 id="inverter-titulo" className="mb-2 text-sm font-black text-blush uppercase">
+        <p id="inverter-titulo" className="mb-2 text-sm font-black text-blush uppercase">
           Inversão
-        </h3>
+        </p>
         <button type="button" className="btn btn-gold w-full" disabled={!duel} onClick={() => updateDemo(rotateCases)}>
           <span aria-hidden="true">↻</span> Inverter: todas avançam uma fábrica
         </button>
@@ -93,9 +93,9 @@ export function DemoControls({ stage, teams }: { stage: Stage; teams: Team[] }) 
       </section>
 
       <section aria-labelledby="coringa-titulo">
-        <h3 id="coringa-titulo" className="mb-2 text-sm font-black text-blush uppercase">
+        <p id="coringa-titulo" className="mb-2 text-sm font-black text-blush uppercase">
           Coringa: trocar duas maletas
-        </h3>
+        </p>
         <TeamChips
           teams={teams}
           label="Escolha duas fábricas para trocar"
@@ -118,9 +118,9 @@ export function DemoControls({ stage, teams }: { stage: Stage; teams: Team[] }) 
       </section>
 
       <section aria-labelledby="bonus-titulo">
-        <h3 id="bonus-titulo" className="mb-2 text-sm font-black text-blush uppercase">
+        <p id="bonus-titulo" className="mb-2 text-sm font-black text-blush uppercase">
           Bônus fixo da fábrica
-        </h3>
+        </p>
         <TeamChips teams={teams} label="Fábrica que recebe o bônus" selected={[bonusTeam]} onToggle={setBonusTeam} />
         <div className="mt-3 grid grid-cols-2 gap-3">
           {BONUS_VALUES.map((value) => (

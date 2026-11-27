@@ -115,7 +115,7 @@ export function CharacterEditor() {
                 aria-pressed={option.id === group.id}
                 onClick={() => setGroupId(option.id)}
                 className={`min-h-11 cursor-pointer rounded-full text-sm font-extrabold ${
-                  option.id === group.id ? "bg-pink text-white" : "text-cream/85"
+                  option.id === group.id ? "bg-[#c8105f] text-white" : "text-cream/85"
                 }`}
               >
                 {option.label}
