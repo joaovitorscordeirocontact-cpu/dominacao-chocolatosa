@@ -54,8 +54,12 @@ npm run backend:local     # terminal 1: mostra as duas variáveis
 ```
 
 No terminal 2, rode `npm run dev` com as variáveis que o terminal 1 mostrou, ou
-copie-as para `.env.local`. Para testar vários papéis no mesmo computador, use
-janelas anônimas ou perfis diferentes: abas comuns compartilham a identidade.
+copie-as para `.env.local`. O backend local só escuta no próprio computador:
+celulares não o alcançam.
+
+Abas do mesmo perfil compartilham a identidade. Para testar vários papéis, use
+perfis ou navegadores diferentes. No Chrome, todas as janelas anônimas também
+compartilham uma única identidade entre si.
 
 ### B) Com um projeto Supabase
 
