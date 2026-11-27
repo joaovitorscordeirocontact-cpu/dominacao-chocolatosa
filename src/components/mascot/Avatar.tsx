@@ -8,7 +8,7 @@ const CROP = { x: 31, y: 6, size: 580 };
 export function Avatar({ look, className = "size-16" }: { look: MascotLook; className?: string }) {
   return (
     <span
-      className={`relative block shrink-0 overflow-hidden rounded-full border-2 border-gold bg-[radial-gradient(circle_at_50%_30%,#8a5440,#3a1a13_75%)] shadow-[0_6px_14px_-6px_#000] ${className}`}
+      className={`relative block shrink-0 overflow-hidden rounded-full border-2 border-gold bg-[radial-gradient(circle_at_50%_35%,#fff0dd,#f0a8b7_55%,#b9657c)] shadow-[0_6px_14px_-6px_#000] ${className}`}
     >
       <span
         className="absolute block"

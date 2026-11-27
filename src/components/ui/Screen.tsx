@@ -45,7 +45,7 @@ export function Screen({
 export function ActionBar({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`pointer-events-none sticky bottom-0 z-30 -mx-4 mt-6 bg-linear-to-t from-espresso via-espresso/90 to-transparent px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] *:pointer-events-auto md:bg-none ${className}`}
+      className={`pointer-events-none sticky bottom-0 z-30 -mx-4 mt-6 bg-linear-to-t from-espresso from-70% to-transparent px-4 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] *:pointer-events-auto md:bg-none ${className}`}
     >
       <div className="mx-auto flex max-w-md flex-col items-stretch gap-2 text-center">{children}</div>
     </div>

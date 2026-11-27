@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm run build",
-    "assets": "python3 scripts/preparar-assets.py"
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "assets": "python3 scripts/preparar-assets.py",
+    "test": "node --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
     "@fontsource-variable/nunito": "^5.3.0",
@@ -28,5 +29,9 @@
     "eslint-config-next": "^16.4.6",
     "tailwindcss": "^4.3.5",
     "typescript": "~5.9"
-  }
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "type": "module"
 }
