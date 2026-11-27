@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import { GameError } from "@/lib/room/errors";
 import { cleanCode, roomPath } from "@/lib/room/links";
+import { deletingHere, justDeleted } from "@/lib/room/memory";
 import { useRoom, type Room } from "@/lib/room/useRoom";
 import type { MemberKind, Snapshot } from "@/lib/room/types";
 import { isConfigured } from "@/lib/supabase/client";
@@ -30,6 +31,51 @@ export function NotConfigured() {
       </p>
     </Notice>
   );
+}
+
+/**
+ * Sala que não existe mais. Quem estava nela fica sabendo que o moderador a
+ * apagou; um convite antigo aberto por outra pessoa só diz que ela acabou.
+ */
+export function RoomGone({ code, wasInside }: { code: string; wasInside: boolean }) {
+  return (
+    <Notice title={wasInside ? "Esta sala foi apagada pelo moderador" : "Sala não encontrada ou encerrada"}>
+      <p role="status">
+        {wasInside ? (
+          <>
+            A partida da sala <strong>{code}</strong> e os dados dela foram removidos. Seu mascote continua salvo neste
+            aparelho.
+          </>
+        ) : (
+          <>
+            O código <strong>{code}</strong> não leva a nenhuma partida aberta.
+          </>
+        )}
+      </p>
+    </Notice>
+  );
+}
+
+/** Quem apagou a sala neste aparelho segue para a lista, com a confirmação. */
+function Deleted({ code, wasInside }: { code: string; wasInside: boolean }) {
+  const router = useRouter();
+  const mine = deletingHere.has(code);
+
+  useEffect(() => {
+    if (!mine) return;
+    // O próprio banco já disse que a sala foi apagada: é a confirmação.
+    justDeleted.code = code;
+    router.replace("/salas/");
+  }, [mine, code, router]);
+
+  if (mine) {
+    return (
+      <p role="status" className="grid min-h-svh place-items-center font-bold">
+        Apagando a sala…
+      </p>
+    );
+  }
+  return <RoomGone code={code} wasInside={wasInside} />;
 }
 
 type CodeRender = (code: string) => React.ReactNode;
@@ -98,6 +144,7 @@ function Loaded({
     if (redirect) router.replace(redirect);
   }, [redirect, router]);
 
+  if (room.phase === "deleted") return <Deleted code={code} wasInside={room.wasInside} />;
   if (room.phase === "not_member") {
     return (
       notMember?.(room) ?? (

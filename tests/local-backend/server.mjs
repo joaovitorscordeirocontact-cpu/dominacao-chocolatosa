@@ -34,7 +34,7 @@ export async function startBackend({ port = 54321 } = {}) {
   const db = await createTestDatabase();
   const refreshTokens = new Map();
   const stats = { signups: 0, rpc: {} };
-  let failRpc = 0;
+  const lose = { name: "dc_command", count: 0 };
 
   function session(userId) {
     const now = Math.floor(Date.now() / 1000);
@@ -88,8 +88,8 @@ export async function startBackend({ port = 54321 } = {}) {
           values, claims.role,
         );
         // Simula a resposta perdida DEPOIS de o banco aplicar o comando.
-        if (failRpc > 0 && rpc[1] === "dc_command") {
-          failRpc -= 1;
+        if (lose.count > 0 && rpc[1] === lose.name) {
+          lose.count -= 1;
           return request.socket.destroy();
         }
         return reply(200, rows[0].r);
@@ -174,8 +174,8 @@ export async function startBackend({ port = 54321 } = {}) {
       for (const ws of sockets) ws.terminate();
     },
     openChannels: () => [...sockets].reduce((total, ws) => total + ws.channels.size, 0),
-    loseNextCommandResponses(count) {
-      failRpc = count;
+    loseNextResponses(count, name = "dc_command") {
+      Object.assign(lose, { count, name });
     },
     async stop() {
       for (const ws of sockets) ws.terminate();

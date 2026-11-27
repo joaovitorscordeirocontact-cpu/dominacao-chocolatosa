@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Notice } from "@/components/room/RoomGate";
+import { Notice, RoomGone } from "@/components/room/RoomGate";
 import { api } from "@/lib/room/api";
 import { GameError, toGameError } from "@/lib/room/errors";
 import { ensureSession } from "@/lib/supabase/client";
@@ -10,6 +10,7 @@ import { ensureSession } from "@/lib/supabase/client";
 export function OpenScreen({ code, onJoined }: { code: string; onJoined: () => void }) {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState("");
+  const [gone, setGone] = useState(false);
 
   async function connect() {
     setBusy(true);
@@ -17,6 +18,7 @@ export function OpenScreen({ code, onJoined }: { code: string; onJoined: () => v
     try {
       await ensureSession();
       const result = await api.joinRoom(code, "screen");
+      if (!result.ok && result.error === "room_not_found") return setGone(true);
       if (!result.ok) throw new GameError(result.error);
       onJoined();
     } catch (error) {
@@ -24,6 +26,8 @@ export function OpenScreen({ code, onJoined }: { code: string; onJoined: () => v
       setBusy(false);
     }
   }
+
+  if (gone) return <RoomGone code={code} wasInside={false} />;
 
   return (
     <Notice title="Abrir o telão">

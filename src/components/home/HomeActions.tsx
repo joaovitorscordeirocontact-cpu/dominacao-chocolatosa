@@ -15,22 +15,31 @@ const PENDING_KEY = "dominacao-chocolatosa:criando-sala";
 
 export function HomeActions() {
   const router = useRouter();
-  const [resume, setResume] = useState<MyRoom | null>(null);
+  const [rooms, setRooms] = useState<MyRoom[]>([]);
+  const resume = rooms.find((room) => room.status !== "ended") ?? null;
+  const moderates = rooms.some((room) => room.kind === "moderator");
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState("");
 
-  // "Continuar partida" só aparece se este aparelho já tiver sessão: visitar a
-  // abertura nunca cria usuário.
+  // "Continuar partida" e "Minhas salas" só aparecem se este aparelho já tiver
+  // sessão: visitar a abertura nunca cria usuário. A lista vem sempre do banco
+  // (e é relida ao voltar à aba), então uma sala apagada não reaparece.
   useEffect(() => {
     if (!isConfigured) return;
     let alive = true;
-    (async () => {
+    const load = async () => {
       if (!(await storedUserId())) return;
-      const open = (await api.myRooms()).find((room) => room.status !== "ended");
-      if (alive) setResume(open ?? null);
-    })().catch(() => {});
+      const list = await api.myRooms();
+      if (alive) setRooms(list);
+    };
+    const wake = () => {
+      if (document.visibilityState === "visible") void load().catch(() => {});
+    };
+    wake();
+    document.addEventListener("visibilitychange", wake);
     return () => {
       alive = false;
+      document.removeEventListener("visibilitychange", wake);
     };
   }, []);
 
@@ -68,6 +77,11 @@ export function HomeActions() {
           Entrar na sala
         </Link>
       </div>
+      {moderates && (
+        <Link href="/salas/" className={styles.rooms}>
+          Minhas salas
+        </Link>
+      )}
       {problem && (
         <p role="alert" className={styles.problem}>
           {problem}

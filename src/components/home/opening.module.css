@@ -172,6 +172,19 @@
   border-width: 2px;
   border-color: var(--color-gold);
 }
+.rooms {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  margin-top: 0.35rem;
+  padding-inline: 1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffdf9a;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  text-shadow: 0 2px 8px #000;
+}
 .problem {
   max-width: 26rem;
   margin-top: 1rem;

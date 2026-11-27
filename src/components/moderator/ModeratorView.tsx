@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/mascot/Avatar";
+import { DeleteRoomDialog } from "@/components/room/DeleteRoomDialog";
 import { CommandFeedback, ConnectionBadge, ConnectionWarning } from "@/components/room/Feedback";
 import { FinalStandings, Scoreboard } from "@/components/room/Scoreboard";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
@@ -17,6 +20,7 @@ import {
   teamViews,
   type TeamView,
 } from "@/lib/room/model";
+import { deletingHere, justDeleted } from "@/lib/room/memory";
 import type { Member, RoundStage as Stage, Snapshot } from "@/lib/room/types";
 import { useCommand, type Commands } from "@/lib/room/useCommand";
 import type { Room } from "@/lib/room/useRoom";
@@ -175,6 +179,45 @@ function PaymentHistory({ snapshot }: { snapshot: Snapshot }) {
   );
 }
 
+/** Sair não apaga nada; apagar remove a partida para todos. */
+function RoomSettings({ snapshot }: { snapshot: Snapshot }) {
+  const router = useRouter();
+  const [asking, setAsking] = useState(false);
+  const { id, code, status, round } = snapshot.room;
+  return (
+    <div className="grid gap-4 text-center">
+      <div className="grid gap-1">
+        <Link href="/" className="btn btn-ghost text-sm">
+          Sair da sala
+        </Link>
+        <p className="text-xs text-cream/80">
+          Não apaga nada. A partida continua salva e você volta por “Minhas salas”.
+        </p>
+      </div>
+      <div className="grid gap-1 border-t border-cream/15 pt-3">
+        <button type="button" className="btn btn-danger text-sm" onClick={() => setAsking(true)}>
+          Apagar sala
+        </button>
+        <p className="text-xs text-cream/80">
+          Remove permanentemente a partida e os dados dela, para todos os participantes.
+        </p>
+      </div>
+      {asking && (
+        <DeleteRoomDialog
+          room={{ roomId: id, code, status, round }}
+          onCancel={() => setAsking(false)}
+          onDeleted={(deleted) => {
+            // "Minhas salas" já abriu pelo aviso do banco: nada mais a fazer.
+            if (!deletingHere.has(deleted)) return;
+            justDeleted.code = deleted;
+            router.replace("/salas/");
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 export function ModeratorView({ room }: { room: Room & { snapshot: Snapshot } }) {
   const { snapshot } = room;
   const commands = useCommand(snapshot.room.id, room.refresh);
@@ -252,6 +295,9 @@ export function ModeratorView({ room }: { room: Room & { snapshot: Snapshot } })
               <PaymentHistory snapshot={snapshot} />
             </Panel>
           )}
+          <Panel title="Configurações da sala">
+            <RoomSettings snapshot={snapshot} />
+          </Panel>
           <Panel title="Histórico">
             <ol className="grid max-h-96 gap-1 overflow-y-auto text-sm" tabIndex={0} aria-label="Histórico da sala">
               {snapshot.history.map((entry) => (

@@ -6,12 +6,10 @@ import { useEffect, useRef } from "react";
 import { FitName } from "@/components/ui/FitName";
 import { asset } from "@/lib/assets";
 import { teamColor } from "@/lib/catalog";
+import { casePositions } from "@/lib/room/memory";
 import { inPlayOrder, signed, teamViews } from "@/lib/room/model";
 import type { Snapshot } from "@/lib/room/types";
 import { Briefcase } from "./Briefcase";
-
-/** Última fábrica de cada maleta (o componente é remontado quando ela muda de quadro). */
-const lastPosition = new Map<string, string>();
 
 /** Maleta em movimento: `layoutId` desliza entre fábricas; o salto reforça o trajeto. */
 function MovingCase({
@@ -29,8 +27,8 @@ function MovingCase({
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    const from = lastPosition.get(id);
-    lastPosition.set(id, team);
+    const from = casePositions.get(id);
+    casePositions.set(id, team);
     if (!from || from === team || reducedMotion) return;
     lift.current?.animate(
       [

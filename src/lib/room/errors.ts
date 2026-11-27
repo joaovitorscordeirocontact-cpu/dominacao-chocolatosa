@@ -18,7 +18,7 @@ const MESSAGES: Record<string, string> = {
   unknown_command: "Ação desconhecida. Recarregue a página para atualizar o aplicativo.",
   too_many_rooms: "Limite de salas criadas hoje neste aparelho foi atingido.",
   too_many_attempts: "Muitas tentativas com códigos errados. Aguarde 10 minutos.",
-  room_not_found: "Não existe sala com esse código.",
+  room_not_found: "Sala não encontrada ou encerrada.",
   room_ended: "Esta partida já foi encerrada.",
   entries_closed: "As entradas estão fechadas. Peça ao moderador para reabrir.",
   room_full: "A sala está cheia.",

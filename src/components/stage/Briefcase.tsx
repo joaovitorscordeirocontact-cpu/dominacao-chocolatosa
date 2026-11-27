@@ -2,12 +2,10 @@
 
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { openedCases } from "@/lib/room/memory";
 import { caseDescription, caseValue } from "@/lib/room/model";
 import type { CaseKind } from "@/lib/room/types";
 import styles from "./briefcase.module.css";
-
-/** Aberturas já animadas: ao mudar de fábrica ou de etapa, a tampa não "reabre". */
-const animated = new Set<string>();
 
 /** Maleta dourada. O conteúdo só existe aqui quando o banco já o revelou. */
 export function Briefcase({
@@ -21,9 +19,9 @@ export function Briefcase({
   revealKey?: string;
 }) {
   const open = content !== null;
-  const [fresh] = useState(() => open && revealKey !== undefined && !animated.has(revealKey));
+  const [fresh] = useState(() => open && revealKey !== undefined && !openedCases.has(revealKey));
   useEffect(() => {
-    if (open && revealKey) animated.add(revealKey);
+    if (open && revealKey) openedCases.add(revealKey);
   }, [open, revealKey]);
   return (
     <div

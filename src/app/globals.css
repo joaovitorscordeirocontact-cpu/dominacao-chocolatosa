@@ -57,6 +57,10 @@ label {
   outline: 3px solid var(--color-gold);
   outline-offset: 3px;
 }
+/* A janela recebe o foco só enquanto os botões estão desativados. */
+dialog:focus-visible {
+  outline: none;
+}
 
 /* 16px evita o zoom automático do iOS ao focar o campo. */
 input,
@@ -128,6 +132,13 @@ textarea {
     inset 0 2px 0 rgb(255 255 255 / 0.55),
     0 5px 0 #83540f,
     0 12px 22px -10px rgb(239 200 121 / 0.7);
+}
+/* Ações destrutivas. */
+.btn-danger {
+  border: 2px solid #ffb4a8;
+  background: linear-gradient(180deg, #d8433a, #a81f1f 55%, #8a1414);
+  color: #fff;
+  text-shadow: 0 2px 2px rgb(60 0 0 / 0.55);
 }
 .btn-ghost {
   border: 1.5px solid rgb(239 200 121 / 0.55);

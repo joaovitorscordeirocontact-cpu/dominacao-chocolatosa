@@ -3,14 +3,14 @@
 import { getSupabase } from "../supabase/client";
 import type { MascotLook } from "../types";
 import { toGameError } from "./errors";
-import type { MemberKind, SnapshotResult, SpyRecord, SpyResult } from "./types";
+import type { MemberKind, RoomGone, RoomStatus, SnapshotResult, SpyRecord, SpyResult } from "./types";
 
 const RETRY_DELAYS = [700, 1800];
 
 /**
  * Todas as chamadas são idempotentes no banco (identificador de comando,
- * vínculo único ou autorização de uso único), então repetir após falha de rede
- * é seguro.
+ * vínculo único, autorização de uso único ou registro de sala apagada), então
+ * repetir após falha de rede é seguro.
  */
 async function rpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
   for (let attempt = 0; ; attempt += 1) {
@@ -34,6 +34,15 @@ export type JoinResult =
 
 export type MyRoom = { roomId: string; code: string; status: string; kind: MemberKind; createdAt: string };
 
+export type OwnedRoom = {
+  roomId: string;
+  code: string;
+  status: RoomStatus;
+  round: number;
+  players: number;
+  createdAt: string;
+};
+
 export const api = {
   createRoom: (commandId: string) =>
     rpc<{ roomId: string; code: string }>("dc_create_room", { p_command_id: commandId }),
@@ -45,4 +54,7 @@ export const api = {
   spy: (roomId: string, caseNumber: number) => rpc<SpyResult>("dc_spy", { p_room: roomId, p_number: caseNumber }),
   mySpies: (roomId: string) => rpc<SpyRecord[]>("dc_my_spies", { p_room: roomId }),
   myRooms: () => rpc<MyRoom[]>("dc_my_rooms", {}),
+  ownedRooms: () => rpc<OwnedRoom[]>("dc_owned_rooms", {}),
+  deleteRoom: (roomId: string) => rpc<{ ok: true; repeated: boolean }>("dc_delete_room", { p_room: roomId }),
+  roomGone: (code: string) => rpc<RoomGone>("dc_room_gone", { p_code: code }),
 };

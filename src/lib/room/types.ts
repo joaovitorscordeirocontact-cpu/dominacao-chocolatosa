@@ -121,7 +121,11 @@ export type Snapshot = {
   history: HistoryEntry[];
 };
 
-export type SnapshotResult = Snapshot | { ok: false; error: string };
+/** `error: "room_deleted"` é montado no aparelho (ver `readRoom` em sync.ts). */
+export type SnapshotResult = Snapshot | { ok: false; error: string; wasMember?: boolean };
+
+/** Resposta de public.dc_room_gone: o código é de uma sala apagada? */
+export type RoomGone = { gone: boolean; wasMember: boolean };
 
 export type SpyResult = { number: number; kind: CaseKind; amount: number };
 export type SpyRecord = SpyResult & { round: number };

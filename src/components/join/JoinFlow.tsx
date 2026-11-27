@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CharacterEditor } from "@/components/character/CharacterEditor";
-import { NotConfigured } from "@/components/room/RoomGate";
+import { NotConfigured, RoomGone } from "@/components/room/RoomGate";
 import { Screen } from "@/components/ui/Screen";
 import { saveProfile, useHydrated, useProfile } from "@/lib/profile-store";
 import { api } from "@/lib/room/api";
 import { GameError, toGameError } from "@/lib/room/errors";
 import { cleanCode, roomPath } from "@/lib/room/links";
+import { readRoom } from "@/lib/room/sync";
 import { ensureSession, isConfigured, storedUserId } from "@/lib/supabase/client";
 
 function CodeForm() {
@@ -55,16 +56,22 @@ function JoinRoom({ code }: { code: string }) {
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState("");
+  const [gone, setGone] = useState<{ wasInside: boolean } | null>(null);
 
-  // Quem já faz parte da sala volta direto para ela, sem duplicar.
+  // Quem já faz parte da sala volta direto para ela, sem duplicar. Um convite
+  // de sala apagada é avisado já na chegada, sem criar usuário.
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        if (await storedUserId()) {
-          const snapshot = await api.snapshot(code);
-          if (alive && snapshot.ok) return router.replace(roomPath(snapshot.me.kind, code));
-        }
+        const found = await readRoom({
+          hasSession: async () => (await storedUserId()) !== null,
+          snapshot: () => api.snapshot(code),
+          gone: () => api.roomGone(code),
+        });
+        if (!alive) return;
+        if (found.ok) return router.replace(roomPath(found.me.kind, code));
+        if (found.error === "room_deleted") setGone({ wasInside: found.wasMember === true });
       } catch (error) {
         if (alive) setProblem(toGameError(error).message);
       }
@@ -82,6 +89,7 @@ function JoinRoom({ code }: { code: string }) {
       await ensureSession();
       const { name, ...look } = profile;
       const result = await api.joinRoom(code, "player", name.trim(), look);
+      if (!result.ok && result.error === "room_not_found") return setGone({ wasInside: false });
       if (!result.ok) throw new GameError(result.error);
       saveProfile(profile);
       router.push(roomPath(result.kind, code));
@@ -98,6 +106,8 @@ function JoinRoom({ code }: { code: string }) {
       </p>
     );
   }
+
+  if (gone) return <RoomGone code={code} wasInside={gone.wasInside} />;
 
   return (
     <Screen title="Seu mascote" eyebrow={`Sala ${code}`} backHref="/" backLabel="Início">

@@ -1,11 +1,12 @@
 "use client";
 
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getSupabase, isConfigured, storedUserId } from "../supabase/client";
 import { api } from "./api";
 import { keepChannelAlive } from "./channel";
-import { createRoomSync, type RoomView } from "./sync";
+import { forgetRoom } from "./memory";
+import { createRoomSync, readRoom, type RoomView } from "./sync";
 
 /** `supabase.channel()` reaproveita nomes: só assina depois de a remoção anterior terminar. */
 let removal: Promise<unknown> = Promise.resolve();
@@ -28,12 +29,18 @@ export const useOnline = () =>
 export function useRoom(code: string): Room {
   const [sync] = useState(() =>
     createRoomSync({
-      fetch: async () => ((await storedUserId()) ? api.snapshot(code) : { ok: false, error: "not_member" }),
+      fetch: () =>
+        readRoom({
+          hasSession: async () => (await storedUserId()) !== null,
+          snapshot: () => api.snapshot(code),
+          gone: () => api.roomGone(code),
+        }),
     }),
   );
   const view = useSyncExternalStore(sync.subscribe, sync.getView, sync.getView);
   const online = useOnline();
   const roomId = view.snapshot?.room.id;
+  const deleted = view.phase === "deleted";
 
   useEffect(() => {
     if (!isConfigured) return;
@@ -68,10 +75,18 @@ export function useRoom(code: string): Room {
       remove: (channel) => supabase.removeChannel(channel),
       onLive: sync.setLive,
     });
+    // Sala apagada ou perdida: `roomId` some e a assinatura é encerrada aqui.
     return () => {
       removal = keeper.stop();
     };
   }, [roomId, sync]);
+
+  // Esquece o que este aparelho guardava em memória sobre a sala apagada.
+  const lastRoomId = useRef<string | null>(null);
+  useEffect(() => {
+    if (roomId) lastRoomId.current = roomId;
+    else if (deleted && lastRoomId.current) forgetRoom(lastRoomId.current);
+  }, [roomId, deleted]);
 
   return { ...view, online, refresh: sync.refresh };
 }
