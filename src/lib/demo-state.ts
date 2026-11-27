@@ -10,6 +10,7 @@ import {
   TEAM_IDS,
 } from "./catalog.ts";
 import { INITIAL_PARTICIPATION } from "./mock-data.ts";
+import { createInitialStage, sanitizeStage } from "./stage.ts";
 import type {
   AccessoryId,
   AccessorySlot,
@@ -28,6 +29,7 @@ export function createDefaultState(): DemoState {
     factory: { name: "", model: "engrenagem", background: "palco-rosa" },
     battle: createInitialBattle(),
     participation: { ...INITIAL_PARTICIPATION },
+    stage: createInitialStage(),
   };
 }
 
@@ -95,6 +97,7 @@ export function sanitizeState(raw: unknown): DemoState {
     profile: { name: cleanName(profile.name), ...sanitizeLook(profile, base.profile) },
     factory: sanitizeFactory(raw.factory, base.factory),
     participation: sanitizeCounts(raw.participation, base.participation),
+    stage: sanitizeStage(raw.stage),
   };
   return { ...state, battle: sanitizeBattle(raw.battle, state) };
 }

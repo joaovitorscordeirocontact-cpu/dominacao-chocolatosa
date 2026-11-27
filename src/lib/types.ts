@@ -69,6 +69,28 @@ export type Battle = {
   confirmed: Record<TeamId, boolean>;
 };
 
+export type StageView = "escolha" | "confronto";
+
+export type BonusValue = 2 | 4;
+
+/** Último acontecimento do palco, usado como destaque no telão. */
+export type StageEvent = {
+  seq: number;
+  message: string;
+  teams: TeamId[];
+};
+
+/** Palco de DEMONSTRAÇÃO das maletas (não é a economia nem o baralho do jogo). */
+export type Stage = {
+  view: StageView;
+  /** Maleta que está com cada fábrica (muda com inversões e trocas). */
+  picks: Record<TeamId, number | null>;
+  revealed: boolean;
+  /** Bônus fixo: pertence à FÁBRICA e nunca acompanha a maleta. */
+  bonuses: Record<TeamId, number>;
+  event: StageEvent | null;
+};
+
 /** Preferências visuais da demonstração. */
 export type Settings = {
   /** Exibe a identificação opcional "Atmosfera Jovem". */
@@ -83,4 +105,5 @@ export type DemoState = {
   battle: Battle;
   /** Participações em batalhas pelas cartas, por participante. */
   participation: Record<string, number>;
+  stage: Stage;
 };

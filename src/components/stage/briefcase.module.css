@@ -1,0 +1,115 @@
+/* Maleta dourada em 3D: base fixa + tampa articulada na borda superior. */
+.case {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  container-type: inline-size;
+}
+.handle {
+  position: absolute;
+  top: 17%;
+  left: 33%;
+  width: 34%;
+  height: 18%;
+  border: 3.5cqw solid #d9a443;
+  border-bottom: 0;
+  border-radius: 8cqw 8cqw 0 0;
+  box-shadow: inset 0 1.2cqw 0 rgb(255 255 255 / 0.55);
+  transition: opacity 0.2s;
+}
+.open .handle {
+  opacity: 0;
+}
+.body {
+  position: absolute;
+  inset: 31% 0 3%;
+  perspective: 160cqw;
+  filter: drop-shadow(0 5cqw 4cqw rgb(0 0 0 / 0.55));
+}
+.inside {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3cqw solid #e5b655;
+  border-radius: 9cqw;
+  background: radial-gradient(circle at 50% 45%, #8d1c58, #3d0a26 80%);
+  box-shadow: inset 0 3cqw 6cqw rgb(0 0 0 / 0.6);
+  font-family: var(--font-display);
+  line-height: 0.95;
+}
+.value {
+  font-size: 27cqw;
+  color: #fff0dd;
+  text-shadow: 0 0 5cqw rgb(255 220 150 / 0.85);
+}
+.negative {
+  color: #ffb3b3;
+}
+.unit {
+  font-size: 8cqw;
+  color: var(--color-gold);
+}
+.lid {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.face,
+.back {
+  position: absolute;
+  inset: 0;
+  border-radius: 9cqw;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face {
+  display: grid;
+  place-items: center;
+  border: 1.5cqw solid #ffe9a8;
+  background:
+    linear-gradient(112deg, transparent 22%, rgb(255 255 255 / 0.5) 31%, transparent 41%),
+    linear-gradient(180deg, #ffe9a0, #efc04f 42%, #c28a26 78%, #e2b04a);
+  box-shadow: inset 0 -3cqw 5cqw rgb(110 66 5 / 0.55);
+}
+.back {
+  transform: rotateX(180deg);
+  border: 3cqw solid #d9a443;
+  background: radial-gradient(circle at 50% 70%, #a52a6a, #4c0d30 85%);
+}
+.plate {
+  min-width: 46%;
+  border: 1.5cqw solid #8c5a12;
+  border-radius: 99cqw;
+  background: #3a1a10;
+  padding: 1cqw 5cqw 2cqw;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 23cqw;
+  line-height: 1.05;
+  color: #fff0dd;
+}
+.latch {
+  position: absolute;
+  top: -1.5cqw;
+  width: 9cqw;
+  height: 9cqw;
+  border-radius: 2cqw;
+  background: linear-gradient(#fff3c4, #a9721f);
+}
+.tag {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 20%;
+  border-radius: 99cqw;
+  border: 1cqw solid var(--color-gold);
+  background: var(--color-espresso);
+  padding: 0 4cqw;
+  font-size: 9cqw;
+  font-weight: 900;
+  white-space: nowrap;
+}
