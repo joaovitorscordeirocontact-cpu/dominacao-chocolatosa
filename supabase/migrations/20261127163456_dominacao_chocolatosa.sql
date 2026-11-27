@@ -212,10 +212,19 @@ create index commands_room_idx on dominacao.commands (room_id);
 
 -- Freio simples contra adivinhação de códigos de sala.
 create table dominacao.join_failures (
+  id      bigint generated always as identity primary key,
   user_id uuid not null,
   at      timestamptz not null default now()
 );
 create index join_failures_idx on dominacao.join_failures (user_id, at);
+
+-- Índices das chaves estrangeiras compostas (junções e exclusões por sala).
+create index members_team_idx on dominacao.members (room_id, team_id);
+create index round_teams_team_idx on dominacao.round_teams (room_id, team_id);
+create index round_teams_representative_idx on dominacao.round_teams (room_id, representative_id);
+create index power_uses_target_idx on dominacao.power_uses (room_id, target_team_id);
+create index spy_grants_team_idx on dominacao.spy_grants (room_id, team_id);
+create index payments_team_idx on dominacao.payments (room_id, team_id);
 
 -- -----------------------------------------------------------------------------
 -- RLS e grants
