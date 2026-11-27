@@ -11,6 +11,7 @@ import type { TeamId } from "@/lib/types";
 import { CaseBoard } from "./CaseBoard";
 import { DemoControls } from "./DemoControls";
 import { Duel } from "./Duel";
+import { FitName } from "@/components/ui/FitName";
 
 export function StagePlayer() {
   const state = useDemoState();
@@ -70,9 +71,7 @@ export function StagePlayer() {
               }`}
               style={{ borderColor: TEAM_COLORS[team.id] }}
             >
-              <span className="line-clamp-1">
-                F{TEAM_IDS.indexOf(team.id) + 1} · {team.name}
-              </span>
+              <FitName>{`F${TEAM_IDS.indexOf(team.id) + 1} · ${team.name}`}</FitName>
               <span className="block opacity-80">
                 {stage.picks[team.id] ? `Maleta ${stage.picks[team.id]}` : "sem maleta"}
               </span>

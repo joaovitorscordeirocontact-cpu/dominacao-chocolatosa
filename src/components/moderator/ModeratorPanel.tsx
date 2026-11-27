@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AtmosferaToggle } from "@/components/home/AtmosferaToggle";
 import { Avatar } from "@/components/mascot/Avatar";
 import { DemoControls } from "@/components/stage/DemoControls";
 import { Duel } from "@/components/stage/Duel";
@@ -10,6 +9,7 @@ import { TEAM_COLORS } from "@/lib/catalog";
 import { createDefaultState } from "@/lib/demo-state";
 import { buildTeams } from "@/lib/mock-data";
 import { updateDemo, useDemoState, useHydrated } from "@/lib/store";
+import { FitName } from "@/components/ui/FitName";
 
 const participations = (count: number) => `${count} ${count === 1 ? "participação" : "participações"}`;
 
@@ -121,10 +121,10 @@ export function ModeratorPanel() {
               {teams.map((team) => (
                 <li
                   key={team.id}
-                  className="rounded-xl border-l-8 bg-espresso/60 p-3"
+                  className="min-w-0 rounded-xl border-l-8 bg-espresso/60 p-3"
                   style={{ borderColor: TEAM_COLORS[team.id] }}
                 >
-                  <span className="block truncate text-sm font-bold">{team.name}</span>
+                  <FitName className="text-sm leading-tight font-bold">{team.name}</FitName>
                   <span className="font-display text-2xl text-gold">
                     {stage.picks[team.id] ? `Maleta ${stage.picks[team.id]}` : "—"}
                   </span>
@@ -137,7 +137,6 @@ export function ModeratorPanel() {
 
         <section className="demo-box" aria-label="Ajustes da demonstração">
           <p className="demo-label">Ajustes da demonstração</p>
-          <AtmosferaToggle className="mt-3 w-full" />
           {confirmingReset ? (
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button

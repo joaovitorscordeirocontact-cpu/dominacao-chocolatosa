@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
+import { FitName } from "@/components/ui/FitName";
 import { TEAM_COLORS, TEAM_IDS } from "@/lib/catalog";
 import { caseResult, signed } from "@/lib/stage";
 import type { Stage, Team, TeamId } from "@/lib/types";
@@ -77,9 +78,9 @@ export function Duel({ stage, teams, tv = false }: { stage: Stage; teams: Team[]
                 <span className={`fundo-${team.background} shrink-0 overflow-hidden rounded-lg ${tv ? "size-[4.4vw]" : "size-10"}`}>
                   <img src={`/assets/fabricas/${team.model}.webp`} alt="" className="size-full object-contain" />
                 </span>
-                <p className={`min-w-0 leading-tight font-black ${tv ? "text-[clamp(1rem,1.7vw,2.2rem)]" : "text-xs sm:text-sm"}`}>
+                <p className={`min-w-0 flex-1 leading-tight font-black ${tv ? "text-[clamp(1rem,1.7vw,2.2rem)]" : "text-xs sm:text-sm"}`}>
                   <span className="block text-[0.7em] text-blush">F{position}</span>
-                  <span className="line-clamp-2 break-words">{team.name}</span>
+                  <FitName min={tv ? 14 : 11}>{team.name}</FitName>
                 </p>
               </div>
 

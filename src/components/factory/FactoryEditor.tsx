@@ -8,6 +8,7 @@ import { ActionBar } from "@/components/ui/Screen";
 import { BACKGROUNDS, FACTORY_MODELS, FACTORY_NAME_MAX_LENGTH, NAME_MAX_LENGTH } from "@/lib/catalog";
 import { setFactory, setProfile } from "@/lib/demo-state";
 import { updateDemo, useDemoState, useHydrated } from "@/lib/store";
+import { FitName } from "@/components/ui/FitName";
 import { FactoryScene } from "./FactoryScene";
 
 export function FactoryEditor() {
@@ -43,13 +44,11 @@ function FactoryForm({ disabled }: { disabled: boolean }) {
             <FactoryScene factory={draft} className="aspect-16/11 md:aspect-4/3" />
             <figcaption className="flex items-center gap-3 border-t-2 border-gold/70 bg-chocolate px-3 py-2">
               <Avatar look={state.profile} className="size-11" />
-              <span className="min-w-0">
-                <strong className="gold-text block truncate text-xl font-normal">
-                  {draft.name.trim() || "Nome da fábrica"}
+              <span className="min-w-0 flex-1">
+                <strong className="gold-text block font-normal">
+                  <FitName className="text-xl leading-tight" min={15}>{draft.name.trim() || "Nome da fábrica"}</FitName>
                 </strong>
-                <span className="block truncate text-xs font-bold text-blush">
-                  Capitão: {captain.trim() || "a definir"}
-                </span>
+                <FitName className="text-xs font-bold text-blush">{`Capitão: ${captain.trim() || "a definir"}`}</FitName>
               </span>
             </figcaption>
           </figure>

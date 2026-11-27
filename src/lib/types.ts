@@ -91,14 +91,7 @@ export type Stage = {
   event: StageEvent | null;
 };
 
-/** Preferências visuais da demonstração. */
-export type Settings = {
-  /** Exibe a identificação opcional "Atmosfera Jovem". */
-  showAtmosfera: boolean;
-};
-
 export type DemoState = {
-  settings: Settings;
   profile: Profile;
   /** Fábrica personalizada pelo usuário (corresponde à equipe t1). */
   factory: FactoryIdentity;

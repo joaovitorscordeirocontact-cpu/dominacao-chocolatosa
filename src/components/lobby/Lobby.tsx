@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FactoryScene } from "@/components/factory/FactoryScene";
+import { FitName } from "@/components/ui/FitName";
 import { ActionBar } from "@/components/ui/Screen";
 import { confirmRepresentative, selectRepresentative } from "@/lib/battle";
 import { TEAM_COLORS } from "@/lib/catalog";
@@ -26,8 +27,11 @@ export function Lobby() {
         <figure className="overflow-hidden rounded-3xl border-2 border-gold/70 shadow-panel">
           <FactoryScene factory={team} className="aspect-16/10 md:aspect-4/3" />
           <figcaption className="border-t-2 border-gold/70 bg-chocolate px-4 py-3 text-center">
-            <strong className="gold-text block text-2xl font-normal break-words sm:text-3xl">{team.name}</strong>
-            <span className="font-bold text-blush">Capitão: {captain.name}</span>
+            <strong className="gold-text block font-normal">
+              <FitName className="text-2xl leading-tight sm:text-3xl" min={18}>{team.name}</FitName>
+            </strong>
+            <span className="mt-1 block text-xs font-bold text-blush/80 uppercase">Capitão</span>
+            <FitName className="text-base leading-tight font-bold text-blush">{captain.name}</FitName>
           </figcaption>
         </figure>
 
@@ -39,7 +43,7 @@ export function Lobby() {
                 className="border-t-4 px-1 py-1 text-center text-xs leading-tight font-extrabold"
                 style={{ borderColor: TEAM_COLORS[other.id] }}
               >
-                {other.name}
+                <FitName>{other.name}</FitName>
               </figcaption>
             </figure>
           ))}

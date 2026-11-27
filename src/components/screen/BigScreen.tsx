@@ -7,6 +7,7 @@ import { Avatar } from "@/components/mascot/Avatar";
 import { CaseBoard } from "@/components/stage/CaseBoard";
 import { Duel } from "@/components/stage/Duel";
 import { ChocolateWave } from "@/components/ui/ChocolateWave";
+import { FitName } from "@/components/ui/FitName";
 import { TEAM_COLORS, TEAM_IDS } from "@/lib/catalog";
 import { buildTeams } from "@/lib/mock-data";
 import { useDemoState, useHydrated } from "@/lib/store";
@@ -43,11 +44,15 @@ function Factories({ state, teams }: { state: DemoState; teams: Team[] }) {
               />
             </div>
             <div className="flex flex-col items-center gap-[1vh] px-2 py-[1.6vh] text-center">
-              <h2 className="gold-text text-[clamp(1.25rem,2.4vw,3rem)] leading-tight break-words">{team.name}</h2>
+              <h2 className="gold-text w-full">
+                <FitName className="text-[clamp(1.25rem,2.4vw,3rem)] leading-tight" min={18}>{team.name}</FitName>
+              </h2>
               {representative ? (
-                <div className="factory-pop flex items-center gap-2">
+                <div className="factory-pop flex w-full items-center justify-center gap-2">
                   <Avatar look={representative} className="size-[clamp(3.5rem,6vw,7rem)]" />
-                  <span className="text-[clamp(1.1rem,1.9vw,2.4rem)] font-black">{representative.name}</span>
+                  <span className="min-w-0 flex-1 text-left">
+                    <FitName className="text-[clamp(1.1rem,1.9vw,2.4rem)] leading-tight font-black" min={16}>{representative.name}</FitName>
+                  </span>
                 </div>
               ) : (
                 <div className="flex h-[clamp(3.5rem,6vw,7rem)] items-center justify-center -space-x-3">
@@ -68,7 +73,7 @@ export function BigScreen() {
   const state = useDemoState();
   const hydrated = useHydrated();
   const teams = buildTeams(state);
-  const { stage, settings } = state;
+  const { stage } = state;
   const duel = stage.view === "confronto";
   const board = !duel && Object.values(stage.picks).some(Boolean);
 
@@ -84,11 +89,9 @@ export function BigScreen() {
         <p className="mx-auto w-fit max-w-full rounded-[2rem] border border-gold/40 bg-espresso/90 px-[1.6vw] py-[0.3vh] font-display text-[clamp(1rem,2vw,2.6rem)] text-gold uppercase">
           Dominação Chocolatosa <span className="text-[#ff5aa6]">· Topa ou Arrisca?</span>
         </p>
-        {settings.showAtmosfera && (
-          <p className="text-[clamp(0.65rem,0.9vw,1.1rem)] font-extrabold tracking-[0.4em] text-gold uppercase [text-shadow:0_1px_2px_#000,0_0_8px_#000]">
-            Atmosfera Jovem
-          </p>
-        )}
+        <p className="text-[clamp(0.65rem,0.9vw,1.1rem)] font-extrabold tracking-[0.4em] text-gold uppercase [text-shadow:0_1px_2px_#000,0_0_8px_#000]">
+          Atmosfera Jovem
+        </p>
         <div role="status">
           <h1
             key={hydrated ? headline(state) + (stage.event?.seq ?? 0) : "carregando"}
@@ -113,10 +116,8 @@ export function BigScreen() {
                   style={{ borderColor: TEAM_COLORS[team.id] }}
                 >
                   <img src={`/assets/fabricas/${team.model}.webp`} alt="" className="h-[9vh] max-h-24 w-auto" />
-                  <span className="min-w-0 text-[clamp(0.9rem,1.5vw,2rem)] font-black">
-                    <span className="block truncate">
-                      F{TEAM_IDS.indexOf(team.id) + 1} · {team.name}
-                    </span>
+                  <span className="min-w-0 flex-1 text-[clamp(0.9rem,1.5vw,2rem)] font-black">
+                    <FitName className="leading-tight" min={14}>{`F${TEAM_IDS.indexOf(team.id) + 1} · ${team.name}`}</FitName>
                     <span className="font-display text-[1.4em] font-normal text-gold">
                       {stage.picks[team.id] ? `Maleta ${stage.picks[team.id]}` : "escolhendo…"}
                     </span>

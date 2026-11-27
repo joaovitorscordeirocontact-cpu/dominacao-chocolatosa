@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/mascot/Avatar";
+import { FitName } from "@/components/ui/FitName";
 import type { Participant } from "@/lib/types";
 
 /** Marcador de participações acima do avatar circular. */
@@ -50,7 +51,7 @@ export function ParticipantCard({
         look={participant}
         className={`size-18 sm:size-20 ${selected ? "ring-4 ring-pink" : ""}`}
       />
-      <span className="mt-1 w-full truncate text-sm font-extrabold">{participant.name}</span>
+      <FitName className="mt-1 text-sm leading-tight font-extrabold">{participant.name}</FitName>
       <span className="min-h-4 text-[0.68rem] leading-4 font-bold text-blush">
         {selected
           ? confirmed

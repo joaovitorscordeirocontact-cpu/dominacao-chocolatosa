@@ -7,9 +7,12 @@
   align-items: center;
   overflow: hidden;
   background:
-    radial-gradient(60% 42% at 50% 38%, #7a3d22 0%, transparent 70%),
+    radial-gradient(60% 42% at 50% 40%, #7a3d22 0%, transparent 70%),
     radial-gradient(100% 70% at 50% 110%, #5b2414 0%, transparent 70%),
     linear-gradient(180deg, #2a120d, #3d1b12 55%, #1d0e0c);
+
+  /* Largura das fábricas de canto; o conteúdo reserva a altura correspondente. */
+  --factory: min(44vw, 23svh);
 }
 
 .art {
@@ -26,31 +29,36 @@
   user-select: none;
 }
 
-/* Celular em pé: ondas no topo e as duas fábricas lado a lado na base. */
+/* ---------- Celular em pé ---------- */
 .art .top {
   display: none;
 }
-.wave {
+.topWave {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: min(12svh, 100px);
+  height: min(10svh, 84px);
+}
+/* Enquadra a base por trás das fábricas. */
+.bottomWave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: min(13svh, 112px);
 }
 .left,
 .right {
   bottom: 0;
-  width: min(64vw, 30svh);
-  mask-image: linear-gradient(transparent, #000 20%);
+  width: var(--factory);
+  mask-image: linear-gradient(transparent, #000 22%);
 }
-.left {
-  left: -4vw;
+.art .left {
+  left: -3vw;
 }
-.right {
-  right: -4vw;
-}
-.art .base {
-  display: none;
+.art .right {
+  right: -3vw;
 }
 
 .content {
@@ -59,21 +67,24 @@
   flex: 1;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: max(3.25rem, calc(env(safe-area-inset-top) + 2.75rem)) 0.75rem
-    calc(min(64vw, 30svh) * 1.05 + env(safe-area-inset-bottom));
   justify-content: center;
+  text-align: center;
+  padding-top: calc(min(10svh, 84px) * 0.7 + env(safe-area-inset-top));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+  /* altura das fábricas (proporção 736/560), com folga pela borda esmaecida */
+  padding-bottom: calc(var(--factory) * 1.08 + env(safe-area-inset-bottom));
+  padding-left: max(1.5rem, env(safe-area-inset-left));
 }
 
 .atmosfera {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
   color: #ffdf9a;
-  font-size: 0.75rem;
+  font-size: min(0.75rem, 3.3vw);
   font-weight: 800;
-  letter-spacing: 0.42em;
+  letter-spacing: 0.34em;
   text-transform: uppercase;
   text-shadow: 0 2px 8px #000;
   white-space: nowrap;
@@ -81,15 +92,15 @@
 .atmosfera::before,
 .atmosfera::after {
   content: "";
-  width: 2rem;
+  width: 1.75rem;
   height: 2px;
   background: linear-gradient(90deg, transparent, #efc879, transparent);
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: min(14.1vw, 4.4rem);
-  line-height: 0.98;
+  font-size: clamp(2.1rem, min(11.2vw, 7svh), 3.5rem);
+  line-height: 1;
   letter-spacing: 0.005em;
   text-transform: uppercase;
   animation: rise-in 0.55s 0.2s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
@@ -130,10 +141,10 @@
 }
 
 .subtitle {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   font-family: var(--font-display);
-  font-size: min(8vw, 2.2rem);
-  line-height: 1.05;
+  font-size: clamp(1.25rem, min(6.2vw, 4svh), 1.85rem);
+  line-height: 1.1;
   text-transform: uppercase;
   color: #ff2f8e;
   text-shadow:
@@ -146,104 +157,91 @@
 .actions {
   display: flex;
   width: 100%;
-  max-width: 26rem;
+  max-width: 17.5rem;
   flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  margin-top: 1.4rem;
+  gap: 0.85rem;
+  margin-top: clamp(1.1rem, 3.6svh, 2rem);
   animation: rise-in 0.4s 0.65s ease-out backwards;
 }
-.play {
-  width: min(100%, 22rem);
-  min-height: 4rem;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.5rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.action {
+  width: 100%;
+  min-height: 3.25rem;
+  font-size: 1.05rem;
 }
 
-.option {
-  position: absolute;
-  top: max(0.5rem, env(safe-area-inset-top));
-  right: max(0.5rem, env(safe-area-inset-right));
-  z-index: 2;
+/* Celulares baixos em pé: encolhe a moldura para sobrar respiro. */
+@media (max-aspect-ratio: 1/1) and (max-height: 640px) {
+  .screen {
+    --factory: min(35vw, 19svh);
+  }
+  .action {
+    min-height: 3rem;
+  }
+  .actions {
+    gap: 0.65rem;
+  }
 }
 
-/* Telão e computadores: composição horizontal, como na referência. */
+/* ---------- Telão, computadores e celular deitado ---------- */
 @media (min-aspect-ratio: 1/1) {
+  .screen {
+    --factory: min(23vw, 40svh);
+  }
   .art .top {
     display: block;
     top: 0;
     left: 0;
     width: 100%;
   }
-  .wave {
+  .topWave {
     display: none;
   }
-  .left,
-  .right {
-    width: min(33.5vw, 59.5svh);
+  .bottomWave {
+    height: min(19svh, 13vw);
   }
   .left,
   .right {
-    mask-image: linear-gradient(transparent, #000 7%);
+    mask-image: linear-gradient(transparent, #000 12%);
   }
-  .left {
+  .art .left {
     left: 0;
   }
-  .right {
+  .art .right {
     right: 0;
   }
-  .art .base {
-    display: block;
-    bottom: 0;
-    left: 50%;
-    width: min(49.6vw, 88svh);
-    transform: translateX(-50%);
-    z-index: -1;
-  }
   .content {
-    padding: min(7vw, 10svh) 1rem min(8vw, 15svh);
+    padding: min(4vw, 6svh) 1rem min(6vw, 11svh);
   }
   .atmosfera {
-    font-size: min(1.25vw, 2.2svh);
-    margin-bottom: min(1.6vw, 2.8svh);
+    margin-bottom: min(1.2vw, 2.2svh);
+    font-size: clamp(0.65rem, min(1.05vw, 1.8svh), 1.2rem);
+    letter-spacing: 0.42em;
   }
   .atmosfera::before,
   .atmosfera::after {
-    width: 6em;
+    width: 5em;
   }
   .title {
-    font-size: min(9.4vw, 16.6svh);
+    font-size: min(6.2vw, 11svh);
   }
   .subtitle {
-    margin-top: min(1.6vw, 2.6svh);
-    font-size: min(4.1vw, 7.2svh);
+    margin-top: min(1.3vw, 2.3svh);
+    font-size: max(1.1rem, min(2.5vw, 4.4svh));
   }
   .actions {
-    margin-top: min(2.2vw, 3.6svh);
-    max-width: 34rem;
+    width: auto;
+    max-width: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: min(1.2vw, 2svh);
+    margin-top: min(2.4vw, 4.4svh);
   }
-  .play {
-    width: min(100%, max(20rem, 52svh));
-    font-size: max(1.35rem, min(2.4vw, 4.2svh));
-    min-height: max(3.6rem, 9svh);
-  }
-}
-
-/* Celular deitado: prioriza o conteúdo. */
-@media (min-aspect-ratio: 1/1) and (max-height: 520px) {
-  .left,
-  .right {
-    width: 24vw;
-    opacity: 0.85;
-  }
-  .art .base {
-    display: none;
-  }
-  .content {
-    padding-block: 0.75rem;
+  .action {
+    width: auto;
+    min-width: max(13rem, min(18vw, 30svh));
+    min-height: clamp(3rem, 7svh, 4.5rem);
+    padding-inline: 2rem;
+    font-size: clamp(1rem, min(1.4vw, 2.5svh), 1.55rem);
   }
 }

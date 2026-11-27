@@ -31,3 +31,39 @@ export function ChocolateWave({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+/** Maré de chocolate da base: três tons de marrom com fitas rosa e dourada. */
+export function ChocolateTide({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="tide-milk" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#9a5530" />
+          <stop offset="1" stopColor="#4a2314" />
+        </linearGradient>
+        <linearGradient id="tide-mid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#6b321c" />
+          <stop offset="1" stopColor="#2f140c" />
+        </linearGradient>
+        <linearGradient id="tide-dark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3f1c10" />
+          <stop offset="1" stopColor="#1d0e0c" />
+        </linearGradient>
+        <linearGradient id="tide-gold" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#8c5a12" />
+          <stop offset="0.3" stopColor="#ffe9a8" />
+          <stop offset="0.6" stopColor="#c98f2e" />
+          <stop offset="0.85" stopColor="#ffe9a8" />
+          <stop offset="1" stopColor="#9a6718" />
+        </linearGradient>
+      </defs>
+      <path d="M0 24C40 4 80 6 118 28S190 62 232 44 300 10 344 20 386 36 400 30V100H0Z" fill="url(#tide-milk)" />
+      <path d="M0 24C40 4 80 6 118 28S190 62 232 44 300 10 344 20 386 36 400 30" fill="none" stroke="url(#tide-gold)" strokeWidth="1.6" />
+      <path d="M0 46C46 30 90 40 132 60S214 78 256 58 330 34 400 52V66C334 50 304 62 258 76S170 90 126 76 42 48 0 64Z" fill="#e31774" />
+      <path d="M0 58C46 42 90 52 132 72S214 90 256 70 330 46 400 64V100H0Z" fill="url(#tide-mid)" />
+      <path d="M0 58C46 42 90 52 132 72S214 90 256 70 330 46 400 64" fill="none" stroke="url(#tide-gold)" strokeWidth="2.2" />
+      <path d="M0 82C60 68 120 96 196 90S320 70 400 84V100H0Z" fill="url(#tide-dark)" />
+      <path d="M22 38C52 24 78 28 102 42M262 52C292 36 318 28 346 32" fill="none" stroke="#fff0dd" strokeOpacity="0.18" strokeWidth="3.5" strokeLinecap="round" />
+    </svg>
+  );
+}

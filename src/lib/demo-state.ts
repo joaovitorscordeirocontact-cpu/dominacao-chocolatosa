@@ -24,7 +24,6 @@ import type {
 
 export function createDefaultState(): DemoState {
   return {
-    settings: { showAtmosfera: true },
     profile: { name: "", color: "rosa", accessories: {} },
     factory: { name: "", model: "engrenagem", background: "palco-rosa" },
     battle: createInitialBattle(),
@@ -86,14 +85,9 @@ function sanitizeCounts(raw: unknown, fallback: Record<string, number>): Record<
 export function sanitizeState(raw: unknown): DemoState {
   const base = createDefaultState();
   if (!isObject(raw)) return base;
-  const settings = isObject(raw.settings) ? raw.settings : {};
   const profile = isObject(raw.profile) ? raw.profile : {};
   const state: DemoState = {
     ...base,
-    settings: {
-      showAtmosfera:
-        typeof settings.showAtmosfera === "boolean" ? settings.showAtmosfera : base.settings.showAtmosfera,
-    },
     profile: { name: cleanName(profile.name), ...sanitizeLook(profile, base.profile) },
     factory: sanitizeFactory(raw.factory, base.factory),
     participation: sanitizeCounts(raw.participation, base.participation),
