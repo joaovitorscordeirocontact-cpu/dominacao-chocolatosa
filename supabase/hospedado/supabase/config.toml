@@ -1,0 +1,18 @@
+# Configuração do projeto HOSPEDADO do jogo (ref tfggkikrzmsvzmbovgjm).
+#
+# Declara SOMENTE o que o jogo precisa mudar. A `config push` da CLI 3.x envia
+# apenas as propriedades declaradas; as demais ficam como estão no projeto.
+# Não use o supabase/config.toml da raiz para isso: ele é do ambiente local.
+#
+#   npx supabase@3 config diff --remote=tfggkikrzmsvzmbovgjm --workdir supabase/hospedado
+#   npx supabase@3 config push --remote=tfggkikrzmsvzmbovgjm --workdir supabase/hospedado
+project_id = "dominacao-chocolatosa"
+
+[auth]
+# Participantes entram sem cadastro.
+enable_anonymous_sign_ins = true
+
+[auth.rate_limit]
+# Entradas anônimas por hora e por IP. O padrão (30) não comporta 20-30
+# participantes, moderador e telão no mesmo Wi-Fi, com folga para repetições.
+anonymous_users = 150

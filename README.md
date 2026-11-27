@@ -61,52 +61,95 @@ Abas do mesmo perfil compartilham a identidade. Para testar vários papéis, use
 perfis ou navegadores diferentes. No Chrome, todas as janelas anônimas também
 compartilham uma única identidade entre si.
 
-### B) Com um projeto Supabase
+### B) Com o projeto Supabase
 
 Copie `.env.example` para `.env.local`, preencha a URL e a chave
-**publicável** e rode `npm run dev` (http://localhost:3000).
+**publicável** (Dashboard → Project Settings → API Keys) e rode `npm run dev`
+(http://localhost:3000). Se o `npm run dev` já estiver ligado, reinicie-o.
 
 Sem essas variáveis, o aplicativo informa que o servidor não está configurado.
 Ele não simula partidas.
 
-## Configurar o Supabase
+## Supabase
 
-Um único projeto atende todas as salas. **Prefira um projeto sem outros
-aplicativos**, porque os passos 2 e 3 valem para o projeto inteiro.
+O projeto do jogo é o **dominacao-chocolatosa**
+(`tfggkikrzmsvzmbovgjm`, região `sa-east-1`). Um único projeto atende todas as
+salas.
 
-1. **Migração.** Num projeto dedicado:
-   ```bash
-   supabase link --project-ref SEU_REF
-   supabase db push --dry-run   # confira antes
-   supabase db push
-   ```
-   Se o projeto já tiver o histórico de migrações de outro aplicativo, o
-   `db push` vai acusar versões que não existem nesta pasta. Não use
-   `migration repair` sem entender o efeito: aplique o arquivo de
-   `supabase/migrations/` pelo SQL Editor.
-   A migração cria o schema `dominacao`, funções `dc_*` em `public` e uma
-   política em `realtime.messages` restrita aos tópicos `dominacao:*`.
-2. **Authentication → Sign In / Providers → Allow anonymous sign-ins.**
-   Atenção em projeto compartilhado: usuários anônimos recebem o papel
-   `authenticated` e passam a atender às políticas de **outros aplicativos** que
-   confiem apenas nesse papel.
-3. **Authentication → Rate Limits → anonymous sign-ins.** O padrão é **30 por
-   hora por IP**. Com 20 a 30 participantes, moderador e telão no mesmo Wi-Fi,
-   isso pode ser insuficiente. Use pelo menos 150 antes de um evento. Cada
-   aparelho cria um usuário só uma vez (recarregar e reconectar reaproveitam a
-   sessão), mas janelas anônimas e trocas de navegador contam de novo.
-4. **Não** adicione `dominacao` aos schemas expostos da Data API. O acesso é só
-   pelas funções `dc_*`.
-5. O canal do jogo é **privado** e protegido por RLS. Não é preciso mudar as
-   configurações globais do Realtime. No plano Free, o limite documentado é de
-   200 conexões simultâneas e 100 mensagens por segundo no projeto.
-6. Copie a URL e a chave publicável (`sb_publishable_…`). **Nunca** use a chave
-   secreta nem a `service_role` no aplicativo.
-7. Rode `supabase db advisors --linked`. São esperados avisos informativos de
-   "RLS sem política" nas 4 tabelas secretas, que ninguém pode ler diretamente.
+### O que está aplicado
+
+| Item | Estado |
+| --- | --- |
+| Migrações de `supabase/migrations/` | Aplicadas com `supabase db push` |
+| Entrada anônima | Ligada |
+| Limite de entradas anônimas | **150 por hora por IP** (o padrão é 30) |
+| Realtime | Política em `realtime.messages` (criada pela migração); canal privado |
+| Data API | Schema `dominacao` **não** exposto; acesso só pelas funções `dc_*` |
+
+As opções globais do painel do Realtime não foram alteradas: o jogo usa canal
+privado, autorizado por RLS. Se quiser impedir canais públicos no projeto
+inteiro, desligue **Allow public access** em Realtime → Settings. O jogo não
+depende disso, e essa combinação não foi testada.
+
+### Alterar o banco
+
+Nunca edite uma migração já aplicada. Crie outra:
+
+```bash
+supabase migration new descricao < /dev/null   # a CLI lê o conteúdo da entrada padrão
+npm run test:db
+supabase db push --dry-run                     # confira antes
+supabase db push
+```
+
+### Alterar a autenticação
+
+`supabase/hospedado/supabase/config.toml` declara **somente** o que o jogo muda.
+Use a CLI **3.x**: nela, `config push` envia apenas o que está declarado e há
+`config diff` para conferir antes. Não envie o `supabase/config.toml` da raiz,
+que é do ambiente local.
+
+```bash
+npx supabase@3 config diff --remote=tfggkikrzmsvzmbovgjm --workdir supabase/hospedado
+npx supabase@3 config push --remote=tfggkikrzmsvzmbovgjm --workdir supabase/hospedado
+```
+
+Cada aparelho cria um usuário só uma vez: recarregar e reconectar reaproveitam a
+sessão. Janelas anônimas e trocas de navegador contam de novo no limite.
 
 O Supabase recomenda CAPTCHA para a entrada anônima. Ele **não** está integrado:
 se for ativado no painel, as entradas param de funcionar.
+
+### Validar o projeto
+
+```bash
+npm run validar:supabase    # lê .env.local
+```
+
+Usa só a chave publicável, como o aplicativo. Confere o acesso negado, a
+autorização do canal Realtime e uma partida de 15 rodadas com 4 equipes
+(concorrência, espionagem, pagamento duplicado e conservação). **Cria dados
+reais** (uma sala e 11 usuários anônimos) e imprime o SQL que apaga somente
+eles. Não faz parte do `npm run check`.
+
+`supabase db advisors --linked` mostra, como esperado:
+
+- `auth_allow_anonymous_sign_ins` (aviso, 10 políticas): quem joga são usuários
+  anônimos. Todas as políticas exigem ser integrante da sala.
+- `rls_enabled_no_policy` (informativo, 4 tabelas secretas): ninguém as lê
+  diretamente.
+
+### Outro projeto
+
+Para montar o jogo em outro projeto, repita: `supabase link`, `supabase db push`
+e o `config push` acima. **Prefira um projeto sem outros aplicativos:** usuários
+anônimos recebem o papel `authenticated` e passam a atender às políticas que
+confiem apenas nesse papel. Se houver histórico de migrações de outro app, o
+`db push` vai acusar versões que não existem nesta pasta. Não use
+`migration repair` sem entender o efeito.
+
+No plano Free, o limite documentado do Realtime é de 200 conexões simultâneas e
+100 mensagens por segundo no projeto.
 
 ### Limpeza
 
@@ -116,8 +159,8 @@ Nada é apagado automaticamente. Para remover salas antigas (SQL Editor):
 delete from dominacao.rooms where created_at < now() - interval '30 days';
 ```
 
-Usuários anônimos antigos ficam em `auth.users`. Em projeto compartilhado, não os
-apague em lote: podem pertencer a outro aplicativo.
+Usuários anônimos antigos ficam em `auth.users`. Num projeto compartilhado, não
+os apague em lote: podem pertencer a outro aplicativo.
 
 ## Publicar no GitHub Pages
 
@@ -219,8 +262,9 @@ final. Para usar um servidor existente, defina `DATABASE_URL`.
 
 | Comando | O que faz |
 | --- | --- |
-| `npm test` | Sincronização, textos, convites, mascote e migração do perfil |
+| `npm test` | Sincronização, reconexão do canal, textos, convites, mascote e perfil |
 | `npm run test:db` | Regras, permissões, concorrência, idempotência e conservação |
+| `npm run validar:supabase` | Valida o projeto hospedado (cria dados reais) |
 | `npm run assets` | Regera `public/assets/` (Python 3 e Pillow) |
 
 Os testes do banco usam `supabase/tests/supabase-shim.sql`, que imita o mínimo
@@ -240,6 +284,10 @@ tests/                   unidade, banco e backend local
 ```
 
 ## Limitações conhecidas
+
+- Na primeira conexão Realtime da história do projeto, uma assinatura falhou uma
+  vez com `CHANNEL_ERROR`. Não se repetiu e a causa não foi confirmada. O
+  aplicativo tenta de novo e, enquanto isso, consulta o estado periodicamente.
 
 - **Moderador preso à sessão do navegador.** Limpar os dados ou trocar de
   aparelho perde a moderação da sala, e não há recuperação. Não use janela
