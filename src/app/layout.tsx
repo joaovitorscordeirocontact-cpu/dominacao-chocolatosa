@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource/lilita-one/latin-400.css";
+import "@fontsource-variable/nunito/wght.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,6 +13,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: "#1d0e0c",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,249 @@
+.screen {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 42% at 50% 38%, #7a3d22 0%, transparent 70%),
+    radial-gradient(100% 70% at 50% 110%, #5b2414 0%, transparent 70%),
+    linear-gradient(180deg, #2a120d, #3d1b12 55%, #1d0e0c);
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  animation: scene-in 0.7s ease-out backwards;
+}
+.art img {
+  position: absolute;
+  display: block;
+  height: auto;
+  user-select: none;
+}
+
+/* Celular em pé: ondas no topo e as duas fábricas lado a lado na base. */
+.art .top {
+  display: none;
+}
+.wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: min(12svh, 100px);
+}
+.left,
+.right {
+  bottom: 0;
+  width: min(64vw, 30svh);
+  mask-image: linear-gradient(transparent, #000 20%);
+}
+.left {
+  left: -4vw;
+}
+.right {
+  right: -4vw;
+}
+.art .base {
+  display: none;
+}
+
+.content {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: max(3.25rem, calc(env(safe-area-inset-top) + 2.75rem)) 0.75rem
+    calc(min(64vw, 30svh) * 1.05 + env(safe-area-inset-bottom));
+  justify-content: center;
+}
+
+.atmosfera {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  color: #ffdf9a;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px #000;
+  white-space: nowrap;
+}
+.atmosfera::before,
+.atmosfera::after {
+  content: "";
+  width: 2rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #efc879, transparent);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: min(14.1vw, 4.4rem);
+  line-height: 0.98;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  animation: rise-in 0.55s 0.2s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+}
+.word {
+  position: relative;
+  display: block;
+  white-space: nowrap;
+}
+/* Camada de trás: contorno e extrusão do "metal". */
+.word::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: #8a4a0c;
+  -webkit-text-stroke: 0.09em #8a4a0c;
+  text-shadow:
+    0 0.05em 0 #6b3606,
+    0 0.09em 0 #4e2604,
+    0 0.16em 0.18em rgb(0 0 0 / 0.65);
+}
+.word > span {
+  background:
+    linear-gradient(105deg, transparent 42%, rgb(255 255 255 / 0.95) 50%, transparent 58%) 160% 0 / 250% 100% no-repeat,
+    linear-gradient(180deg, #fff7d1 12%, #ffd96f 40%, #e0a02c 56%, #ffe18e 74%, #c8841b 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 1.1s 0.9s ease-in-out forwards;
+}
+@keyframes shine {
+  to {
+    background-position:
+      -60% 0,
+      0 0;
+  }
+}
+
+.subtitle {
+  margin-top: 0.9rem;
+  font-family: var(--font-display);
+  font-size: min(8vw, 2.2rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #ff2f8e;
+  text-shadow:
+    0 0.07em 0 #8c0a49,
+    0 0 0.5em rgb(245 43 135 / 0.55),
+    0 0.12em 0.2em #000;
+  animation: rise-in 0.45s 0.45s ease-out backwards;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  max-width: 26rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.4rem;
+  animation: rise-in 0.4s 0.65s ease-out backwards;
+}
+.play {
+  width: min(100%, 22rem);
+  min-height: 4rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.option {
+  position: absolute;
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.5rem, env(safe-area-inset-right));
+  z-index: 2;
+}
+
+/* Telão e computadores: composição horizontal, como na referência. */
+@media (min-aspect-ratio: 1/1) {
+  .art .top {
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .wave {
+    display: none;
+  }
+  .left,
+  .right {
+    width: min(33.5vw, 59.5svh);
+  }
+  .left,
+  .right {
+    mask-image: linear-gradient(transparent, #000 7%);
+  }
+  .left {
+    left: 0;
+  }
+  .right {
+    right: 0;
+  }
+  .art .base {
+    display: block;
+    bottom: 0;
+    left: 50%;
+    width: min(49.6vw, 88svh);
+    transform: translateX(-50%);
+    z-index: -1;
+  }
+  .content {
+    padding: min(7vw, 10svh) 1rem min(8vw, 15svh);
+  }
+  .atmosfera {
+    font-size: min(1.25vw, 2.2svh);
+    margin-bottom: min(1.6vw, 2.8svh);
+  }
+  .atmosfera::before,
+  .atmosfera::after {
+    width: 6em;
+  }
+  .title {
+    font-size: min(9.4vw, 16.6svh);
+  }
+  .subtitle {
+    margin-top: min(1.6vw, 2.6svh);
+    font-size: min(4.1vw, 7.2svh);
+  }
+  .actions {
+    margin-top: min(2.2vw, 3.6svh);
+    max-width: 34rem;
+    gap: min(1.2vw, 2svh);
+  }
+  .play {
+    width: min(100%, max(20rem, 52svh));
+    font-size: max(1.35rem, min(2.4vw, 4.2svh));
+    min-height: max(3.6rem, 9svh);
+  }
+}
+
+/* Celular deitado: prioriza o conteúdo. */
+@media (min-aspect-ratio: 1/1) and (max-height: 520px) {
+  .left,
+  .right {
+    width: 24vw;
+    opacity: 0.85;
+  }
+  .art .base {
+    display: none;
+  }
+  .content {
+    padding-block: 0.75rem;
+  }
+}
