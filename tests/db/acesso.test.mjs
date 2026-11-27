@@ -86,7 +86,7 @@ test("segredos e identificadores não têm grant; tabelas não aceitam escrita d
   const game = await createGame(db, 4);
   await startMatch(game, 2);
   for (const user of [game.moderator, game.players[0].user]) {
-    for (const table of ["case_contents", "spy_grants", "commands", "join_failures"]) {
+    for (const table of ["case_contents", "spy_grants", "commands", "join_failures", "deleted_rooms"]) {
       await denied(runAs(db.pool, user, `select * from dominacao.${table}`));
     }
     await denied(runAs(db.pool, user, "select user_id from dominacao.members"));
@@ -104,7 +104,7 @@ test("segredos e identificadores não têm grant; tabelas não aceitam escrita d
   }
 });
 
-test("todas as tabelas têm RLS e só as duas funções de apoio e os pontos de entrada são SECURITY DEFINER", async () => {
+test("todas as tabelas têm RLS e só as funções de apoio e os pontos de entrada são SECURITY DEFINER", async () => {
   const noRls = await db.pool.query(
     "select relname from pg_class where relnamespace = 'dominacao'::regnamespace and relkind = 'r' and not relrowsecurity");
   assert.deepEqual(noRls.rows, []);
@@ -112,11 +112,12 @@ test("todas as tabelas têm RLS e só as duas funções de apoio e os pontos de 
     `select proname, proconfig from pg_proc where pronamespace in ('dominacao'::regnamespace, 'public'::regnamespace)
      and prosecdef order by proname`);
   assert.deepEqual(definer.rows.map((r) => r.proname),
-    ["can_listen", "create_room", "is_member", "join_room", "my_member_id", "my_spies", "run_command", "spy", "spy_status"]);
+    ["can_listen", "create_room", "delete_room", "is_member", "join_room", "my_member_id", "my_spies", "room_gone",
+     "run_command", "spy", "spy_status"]);
   assert.ok(definer.rows.every((r) => r.proconfig?.some((c) => c.startsWith("search_path="))), "search_path fixo");
   const exposed = await db.pool.query(
     "select proname, prosecdef from pg_proc where pronamespace = 'public'::regnamespace and proname like 'dc\\_%'");
-  assert.equal(exposed.rows.length, 7);
+  assert.equal(exposed.rows.length, 10);
   assert.ok(exposed.rows.every((r) => !r.prosecdef), "a API pública é SECURITY INVOKER");
 });
 
