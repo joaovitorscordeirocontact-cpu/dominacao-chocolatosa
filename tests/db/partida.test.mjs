@@ -474,3 +474,37 @@ test("a prévia da economia no aplicativo faz a mesma conta do banco", async () 
     }
   }
 });
+
+test("uma sala com todos os tipos de registro pode ser apagada por inteiro (limpeza)", async () => {
+  const game = await createGame(db, 8);
+  await startMatch(game, 4);
+  const [a, b, c, d] = game.teams;
+  await toPreparation(game);
+  await game.mod("register_combo", { teamId: a.id, power: "blue" });
+  await call(db, a.captain.user, "dc_spy", [game.roomId, 9]);
+  await game.mod("register_combo", { teamId: b.id, power: "red", targetTeamId: c.id });
+  await pickAll(game);
+  await game.mod("reveal");
+  await game.mod("register_special", { teamId: d.id, power: "joker", targetTeamId: a.id });
+  await finishRound(game);
+  await game.mod("next_round");
+
+  const keep = await createGame(db, 2);
+  await game.admin("delete from dominacao.rooms where id = $1", [game.roomId]);
+  for (const table of ["teams", "members", "rounds", "round_teams", "cases", "case_contents", "power_uses",
+                       "spy_grants", "payments", "events", "commands"]) {
+    const [{ n }] = await game.admin(`select count(*)::int as n from dominacao.${table} where room_id = $1`, [game.roomId]);
+    assert.equal(n, 0, table);
+  }
+  assert.equal((await keep.snapshot()).members.length, 3, "outras salas permanecem");
+});
+
+test("mesmo com a checagem adiada, nenhuma referência quebrada é gravada", async () => {
+  const game = await createGame(db, 4);
+  await startMatch(game, 2);
+  const [a] = game.teams;
+  // O representante não pode ser apagado enquanto a rodada aponta para ele.
+  await game.command(a.captain.user, "select_representative", { memberId: a.members.at(-1).id });
+  await assert.rejects(game.admin("delete from dominacao.members where id = $1", [a.members.at(-1).id]), /foreign key/);
+  await assert.rejects(game.admin("delete from dominacao.teams where id = $1", [a.id]), /foreign key/);
+});
