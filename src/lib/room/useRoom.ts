@@ -4,6 +4,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getSupabase, isConfigured, storedUserId } from "../supabase/client";
 import { api } from "./api";
+import { keepChannelAlive } from "./channel";
 import { createRoomSync, type RoomView } from "./sync";
 
 /** `supabase.channel()` reaproveita nomes: só assina depois de a remoção anterior terminar. */
@@ -52,42 +53,23 @@ export function useRoom(code: string): Room {
 
   useEffect(() => {
     if (!roomId) return;
-    let cancelled = false;
-    let channel: RealtimeChannel | null = null;
-    let retry: ReturnType<typeof setTimeout> | undefined;
     const supabase = getSupabase();
-
-    const drop = () => {
-      if (channel) removal = supabase.removeChannel(channel);
-      channel = null;
-    };
-    const connect = async () => {
-      await removal;
+    const keeper = keepChannelAlive<RealtimeChannel>({
       // Canal privado: o Realtime autoriza com o JWT atual contra o RLS.
-      await supabase.realtime.setAuth();
-      if (cancelled) return;
-      const current = supabase
-        .channel(`dominacao:${roomId}`, { config: { private: true } })
-        .on("broadcast", { event: "changed" }, (message) => sync.notify(message.payload?.revision))
-        .subscribe((status) => {
-          if (cancelled || channel !== current) return;
-          sync.setLive(status === "SUBSCRIBED");
-          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
-            clearTimeout(retry);
-            retry = setTimeout(() => {
-              if (cancelled || current.state === "joined") return;
-              drop();
-              void connect();
-            }, 5_000);
-          }
-        });
-      channel = current;
-    };
-    void connect();
+      prepare: async () => {
+        await removal;
+        await supabase.realtime.setAuth();
+      },
+      open: (onStatus) =>
+        supabase
+          .channel(`dominacao:${roomId}`, { config: { private: true } })
+          .on("broadcast", { event: "changed" }, (message) => sync.notify(message.payload?.revision))
+          .subscribe(onStatus),
+      remove: (channel) => supabase.removeChannel(channel),
+      onLive: sync.setLive,
+    });
     return () => {
-      cancelled = true;
-      clearTimeout(retry);
-      drop();
+      removal = keeper.stop();
     };
   }, [roomId, sync]);
 
