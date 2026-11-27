@@ -3,9 +3,10 @@
 //
 //   npm run validar:supabase        (lê .env.local)
 //
-// ATENÇÃO: cria usuários anônimos e uma sala de verdade (11 usuários por
-// execução, contando no limite por IP). Ao final, imprime o que foi criado e o
-// SQL para apagar somente isso. Não roda no `npm run check`.
+// ATENÇÃO: cria usuários anônimos e salas de verdade (11 usuários por execução,
+// contando no limite por IP). As salas são apagadas pelo próprio teste; ao
+// final, imprime o SQL que remove somente o que restar desta execução. Não roda
+// no `npm run check`.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, before, test } from "node:test";
@@ -93,6 +94,7 @@ after(async () => {
   console.log(`\nDADOS DE TESTE CRIADOS: ${created.rooms.length} sala(s), ${created.users.length} usuários anônimos.`);
   console.log("Para apagar somente estes registros (SQL Editor):");
   console.log(`delete from dominacao.rooms where id in (${list(created.rooms)});`);
+  console.log(`delete from dominacao.deleted_rooms where room_id in (${list(created.rooms)});`);
   console.log(`delete from dominacao.join_failures where user_id in (${list(created.users)});`);
   console.log(`delete from auth.users where is_anonymous and id in (${list(created.users)});`);
 });
@@ -101,6 +103,8 @@ test("sem sessão nada é executado; tabelas e schema privado não são expostos
   const visitor = { client: newClient() };
   await assert.rejects(call(visitor, "dc_create_room", { p_command_id: randomUUID() }), /permission denied/);
   await assert.rejects(call(visitor, "dc_snapshot", { p_code: "ABCDEF" }), /permission denied/);
+  await assert.rejects(call(visitor, "dc_delete_room", { p_room: randomUUID() }), /permission denied/);
+  await assert.rejects(call(visitor, "dc_owned_rooms", {}), /permission denied/);
   for (const who of [visitor, game.mod]) {
     const direct = await who.client.from("case_contents").select("*");
     assert.ok(direct.error, "case_contents não está na API");
@@ -294,4 +298,123 @@ test("partida completa de 15 rodadas com 4 equipes", { timeout: 600_000 }, async
     `avisos só com a revisão: ${JSON.stringify(game.live.received.slice(0, 2))}`);
   const revisions = new Set(game.live.received.map((p) => p.revision));
   console.log(`  Realtime: ${revisions.size} revisões recebidas pelo canal privado (última: ${last}).`);
+});
+
+const remove = (who, roomId) => call(who, "dc_delete_room", { p_room: roomId });
+const gone = (who, code) => call(who, "dc_room_gone", { p_code: code });
+
+/** Cria outra sala do mesmo moderador, com quatro das pessoas já existentes. */
+async function extraRoom(people) {
+  const room = await call(game.mod, "dc_create_room", { p_command_id: randomUUID() });
+  created.rooms.push(room.roomId);
+  for (const [i, player] of people.entries()) {
+    const join = { p_code: room.code, p_as: "player", p_name: `Validação ${i + 1}`, p_look: { color: "verde" } };
+    assert.equal((await call(player, "dc_join_room", join)).ok, true);
+  }
+  const run = (who, type, args = {}) =>
+    call(who, "dc_command", { p_room: room.roomId, p_command_id: randomUUID(), p_type: type, p_args: args });
+  return { ...room, run, state: (who = game.mod) => call(who, "dc_snapshot", { p_code: room.code }) };
+}
+
+/** Sala em andamento, com espionagem feita e carta apontando para outra equipe. */
+async function roomInPlay() {
+  const people = game.players.slice(0, 4);
+  const room = await extraRoom(people);
+  const ids = [];
+  for (const player of people) ids.push((await room.state(player)).me.memberId);
+  await room.run(game.mod, "form_teams", { captainIds: ids.slice(0, 2) });
+  const state = await room.state();
+  const teams = state.teams.map((team) => {
+    const members = state.members.filter((m) => m.teamId === team.id);
+    const captain = people[ids.indexOf(members.find((m) => m.isCaptain).id)];
+    return { id: team.id, members, captain };
+  });
+  for (const [i, team] of teams.entries()) {
+    await room.run(team.captain, "set_factory", {
+      name: `Exclusão ${i + 1}`, model: "castelo", background: "festa-uva", ready: true,
+    });
+  }
+  await room.run(game.mod, "set_economy", { total: 600, initialPerTeam: 20 });
+  await room.run(game.mod, "start_match");
+  for (const team of teams) await room.run(team.captain, "select_representative", { memberId: team.members[0].id });
+  await room.run(game.mod, "start_battle");
+  const order = teams.map((t) => t.id);
+  await room.run(game.mod, "record_battle", { ranking: order, playOrder: order });
+  await room.run(game.mod, "register_combo", { teamId: order[0], power: "blue" });
+  await call(teams[0].captain, "dc_spy", { p_room: room.roomId, p_number: 9 });
+  await room.run(game.mod, "register_combo", { teamId: order[1], power: "red", targetTeamId: order[0] });
+  return { ...room, teams, people };
+}
+
+/**
+ * Apaga com um integrante escutando e confere o que cada um passa a ver.
+ * `connected` é uma assinatura que já estava aberta; o supabase-js reaproveita o
+ * canal pelo nome, então não se pode assinar o mesmo tópico duas vezes.
+ */
+async function deleteAndVerify(room, { members, label, connected }) {
+  const listener = connected ?? (await listen(members[0], `dominacao:${room.roomId}`));
+  assert.equal(listener.status, "SUBSCRIBED", listener.errors.join(" | "));
+  const { revision } = (await room.state()).room;
+
+  const started = Date.now();
+  assert.deepEqual(await remove(game.mod, room.roomId), { ok: true, repeated: false });
+  // O aviso é publicado na mesma transação que remove a permissão de escuta.
+  await waitFor(() => listener.received.some((p) => p.revision === revision + 1), `aviso da exclusão (${label})`);
+  console.log(`  ${label}: aviso recebido pelo integrante conectado ${Date.now() - started} ms após o pedido.`);
+  await members[0].client.removeChannel(listener.channel);
+
+  for (const who of [game.mod, ...members]) {
+    assert.deepEqual(await room.state(who), { ok: false, error: "not_member" });
+    assert.deepEqual(await gone(who, room.code), { gone: true, wasMember: true });
+    assert.ok((await call(who, "dc_my_rooms", {})).every((r) => r.roomId !== room.roomId));
+  }
+  assert.deepEqual(await gone(game.outsider, room.code), { gone: true, wasMember: false });
+  assert.deepEqual(await gone({ client: newClient() }, room.code), { gone: true, wasMember: false });
+  assert.deepEqual(
+    await call(game.outsider, "dc_join_room", { p_code: room.code, p_as: "player", p_name: "Atrasado", p_look: {} }),
+    { ok: false, error: "room_not_found" });
+  assert.deepEqual(await remove(game.mod, room.roomId), { ok: true, repeated: true });
+  await refused(remove(members[0], room.roomId), "not_member");
+  await refused(room.run(game.mod, "set_entries", { open: true }), "not_member");
+}
+
+test("apagar sala: só o criador, em qualquer estado, sem tocar nas outras", { timeout: 300_000 }, async () => {
+  const playing = await roomInPlay();
+  const lobby = await extraRoom(game.players.slice(0, 2));
+  const [first, second] = playing.teams;
+  const teammate = playing.people.find((p) => p !== first.captain && p !== second.captain);
+
+  // Recusas: capitão, participante, telão da outra sala e quem não é da sala.
+  await refused(remove(first.captain, playing.roomId), "moderator_only");
+  await refused(remove(teammate, playing.roomId), "moderator_only");
+  await refused(remove(game.screen, game.roomId), "moderator_only");
+  for (const who of [game.outsider, game.screen, game.players[7]]) {
+    await refused(remove(who, playing.roomId), "not_member");
+  }
+  assert.equal((await playing.state()).room.stage, "preparation", "recusas não alteram nada");
+  assert.deepEqual(await gone(first.captain, playing.code), { gone: false, wasMember: false });
+
+  const owned = async () => (await call(game.mod, "dc_owned_rooms", {})).map((r) => r.roomId).sort();
+  assert.deepEqual(await owned(), [game.roomId, playing.roomId, lobby.roomId].sort());
+  const lobbyBefore = await lobby.state();
+  const endedBefore = await snapshot();
+
+  await deleteAndVerify(playing, { members: [first.captain, second.captain, teammate], label: "em andamento" });
+  assert.deepEqual(await lobby.state(), lobbyBefore, "a sala no lobby não mudou");
+  assert.deepEqual(await snapshot(), endedBefore, "a sala encerrada não mudou");
+  assert.deepEqual(await call(first.captain, "dc_my_spies", { p_room: playing.roomId }), []);
+  const intruder = await listen(game.players[2], `dominacao:${playing.roomId}`);
+  assert.equal(intruder.status, "CHANNEL_ERROR", "ninguém volta a assinar o canal apagado");
+
+  // Partida encerrada de 15 rodadas (espionagem, coringa, inversão e bônus).
+  await deleteAndVerify(
+    { ...game, state: snapshot, run: command },
+    { members: [game.players[1], game.screen], label: "encerrada", connected: game.live });
+  const kept = await lobby.state(game.players[1]);
+  assert.equal(kept.me.kind, "player", "a mesma identidade continua na outra sala");
+
+  // Duas requisições simultâneas: uma apaga, a outra só confirma.
+  const twice = await Promise.all([remove(game.mod, lobby.roomId), remove(game.mod, lobby.roomId)]);
+  assert.deepEqual(twice.map((r) => r.repeated).sort(), [false, true]);
+  assert.deepEqual(await owned(), []);
 });
