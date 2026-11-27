@@ -3,8 +3,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import layout from "../src/data/accessory-layout.json" with { type: "json" };
 import { HAIR_COLORS, SLOT_IDS, SLOTS } from "../src/lib/catalog.ts";
-import { sanitizeState } from "../src/lib/demo-state.ts";
-import { sanitizeLook, sanitizeProfile } from "../src/lib/look.ts";
+
+import { loadProfile, sanitizeLook, sanitizeProfile } from "../src/lib/look.ts";
 import { accessoryLayers, BODY_Z } from "../src/lib/mascot-layers.ts";
 
 /** Dimensões de um WebP com canal alfa (cabeçalho VP8X) ou sem perdas (VP8L). */
@@ -40,10 +40,18 @@ test("perfil antigo: cabelo ondulado continua longo e castanho", () => {
   assert.equal(migrated.hairColor, "castanho");
 });
 
-test("escolha nova de cor de cabelo é preservada, inclusive ao reler o estado salvo", () => {
-  const saved = sanitizeState({ profile: { name: "A", color: "rosa", hairColor: "branco", accessories: { cabelo: "cabelo-cacheado" } } });
-  assert.equal(saved.profile.hairColor, "branco");
-  assert.deepEqual(sanitizeState(JSON.parse(JSON.stringify(saved))).profile, saved.profile);
+test("perfil novo tem prioridade e é preservado ao reler o que foi salvo", () => {
+  const saved = loadProfile({ name: "A", color: "rosa", hairColor: "branco", accessories: { cabelo: "cabelo-cacheado" } }, { profile: { name: "Velho" } });
+  assert.equal(saved.hairColor, "branco");
+  assert.deepEqual(loadProfile(JSON.parse(JSON.stringify(saved)), null), saved);
+});
+
+test("sem perfil novo, migra o da primeira versão sem apagar a personalização", () => {
+  const legacy = { profile: { name: "Caio", color: "chocolate", accessories: { cabelo: "topete-loiro", chapeu: "coroa" } }, stage: {} };
+  assert.deepEqual(loadProfile(null, legacy), {
+    name: "Caio", color: "chocolate", hairColor: "loiro", accessories: { chapeu: "coroa", cabelo: "cabelo-curto" },
+  });
+  assert.equal(loadProfile(null, null).name, "");
 });
 
 test("valores desconhecidos são descartados", () => {

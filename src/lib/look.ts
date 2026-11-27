@@ -42,3 +42,9 @@ export function sanitizeLook(input: unknown, fallback: MascotLook = DEFAULT_LOOK
 export function sanitizeProfile(input: unknown): Profile {
   return { name: cleanName(isObject(input) ? input.name : ""), ...sanitizeLook(input) };
 }
+
+/** Perfil salvo; na falta dele, o da primeira versão (`estado.profile`). */
+export function loadProfile(saved: unknown, legacyState: unknown): Profile {
+  if (isObject(saved)) return sanitizeProfile(saved);
+  return sanitizeProfile(isObject(legacyState) ? legacyState.profile : null);
+}

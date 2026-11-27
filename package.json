@@ -11,15 +11,18 @@
     "check": "npm run typecheck && npm run lint && npm test && npm run test:db && npm run build",
     "assets": "python3 scripts/preparar-assets.py",
     "test": "node --test \"tests/**/*.test.ts\"",
-    "test:db": "node --test --test-concurrency=1 \"tests/db/*.test.mjs\""
+    "test:db": "node --test --test-concurrency=1 \"tests/db/*.test.mjs\"",
+    "backend:local": "node tests/local-backend/server.mjs"
   },
   "dependencies": {
     "@fontsource-variable/nunito": "^5.3.0",
     "@fontsource/lilita-one": "^5.3.0",
+    "@supabase/supabase-js": "^2.119.2",
     "motion": "^14.14.0",
     "next": "^16.4.6",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "uqr": "^0.1.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.5",
@@ -30,7 +33,8 @@
     "eslint-config-next": "^16.4.6",
     "pg": "^8.23.1",
     "tailwindcss": "^4.3.5",
-    "typescript": "~5.9"
+    "typescript": "~5.9",
+    "ws": "^8.23.0"
   },
   "engines": {
     "node": ">=22.18"

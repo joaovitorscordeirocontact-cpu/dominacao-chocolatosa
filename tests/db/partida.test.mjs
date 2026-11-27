@@ -464,3 +464,13 @@ test("encerrar numa rodada recém-aberta volta ao último pagamento sem perder n
   assert.equal(ended.room.bank, paid.room.bank);
   await indexTeams(game);
 });
+
+test("a prévia da economia no aplicativo faz a mesma conta do banco", async () => {
+  const { planEconomy } = await import("../../src/lib/room/economy.ts");
+  for (const teams of [2, 3, 4]) {
+    for (const [total, initial] of [[0, 0], [93, 0], [94, 0], [134, 10], [133, 10], [100, 50], [5000, 100]]) {
+      const { rows } = await db.pool.query("select dominacao.economy($1, $2, $3) as plan", [total, initial, teams]);
+      assert.deepEqual(rows[0].plan, planEconomy(total, initial, teams), `${teams} equipes, ${total}/${initial}`);
+    }
+  }
+});
