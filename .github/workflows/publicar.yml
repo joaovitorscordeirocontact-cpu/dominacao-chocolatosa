@@ -1,0 +1,68 @@
+name: Publicar no GitHub Pages
+
+# Desligado até alguém decidir publicar. Para ligar (ver README):
+#   1. Settings → Pages → Source: "GitHub Actions"
+#      (no plano Free, o repositório precisa ser público);
+#   2. Settings → Secrets and variables → Actions → Variables:
+#      PAGES_ENABLED=true, NEXT_PUBLIC_SUPABASE_URL e
+#      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (somente a chave PUBLICÁVEL).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    if: vars.PAGES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - id: pages
+        uses: actions/configure-pages@v6
+      - name: Conferir a configuração do Supabase
+        env:
+          URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::error::Defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY nas variáveis do repositório."
+            exit 1
+          fi
+          case "$KEY" in
+            sb_publishable_*) ;;
+            *) echo "::error::Use somente a chave publicável (sb_publishable_...). Nunca publique chaves secretas."; exit 1 ;;
+          esac
+      - run: npm ci
+      - run: npm run typecheck && npm run lint && npm test
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5

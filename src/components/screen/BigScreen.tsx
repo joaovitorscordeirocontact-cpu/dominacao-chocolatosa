@@ -2,6 +2,7 @@
 
 /** Telão: composição própria, com imagens grandes, pouco texto e foco no momento atual. */
 /* eslint-disable @next/next/no-img-element */
+import { asset } from "@/lib/assets";
 import { PerspectiveSwitcher } from "@/components/demo/PerspectiveSwitcher";
 import { Avatar } from "@/components/mascot/Avatar";
 import { CaseBoard } from "@/components/stage/CaseBoard";
@@ -38,7 +39,7 @@ function Factories({ state, teams }: { state: DemoState; teams: Team[] }) {
           >
             <div className={`fundo-${team.background} relative min-h-40 flex-1`}>
               <img
-                src={`/assets/fabricas/${team.model}.webp`}
+                src={asset(`/assets/fabricas/${team.model}.webp`)}
                 alt=""
                 className="factory-pop absolute inset-x-[4%] bottom-[4%] h-[88%] w-[92%] object-contain object-bottom"
               />
@@ -115,7 +116,7 @@ export function BigScreen() {
                   className="flex items-center gap-3 rounded-2xl border-4 bg-chocolate px-3 py-1"
                   style={{ borderColor: TEAM_COLORS[team.id] }}
                 >
-                  <img src={`/assets/fabricas/${team.model}.webp`} alt="" className="h-[9vh] max-h-24 w-auto" />
+                  <img src={asset(`/assets/fabricas/${team.model}.webp`)} alt="" className="h-[9vh] max-h-24 w-auto" />
                   <span className="min-w-0 flex-1 text-[clamp(0.9rem,1.5vw,2rem)] font-black">
                     <FitName className="leading-tight" min={14}>{`F${TEAM_IDS.indexOf(team.id) + 1} · ${team.name}`}</FitName>
                     <span className="font-display text-[1.4em] font-normal text-gold">

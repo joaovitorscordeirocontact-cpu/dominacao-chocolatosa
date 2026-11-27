@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { asset } from "@/lib/assets";
 import type { FactoryIdentity } from "@/lib/types";
 
 /** Combina fundo e modelo de fábrica (escolhas independentes). */
@@ -17,7 +18,7 @@ export function FactoryScene({
       />
       <img
         key={factory.model}
-        src={`/assets/fabricas/${factory.model}.webp`}
+        src={asset(`/assets/fabricas/${factory.model}.webp`)}
         alt=""
         draggable={false}
         className="factory-pop absolute inset-x-0 bottom-[6%] mx-auto h-[86%] w-[92%] object-contain object-bottom"

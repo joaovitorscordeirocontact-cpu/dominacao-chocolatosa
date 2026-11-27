@@ -1,6 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
+import { asset } from "@/lib/assets";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/mascot/Avatar";
@@ -105,7 +106,7 @@ function FactoryForm({ disabled }: { disabled: boolean }) {
                     }`}
                   >
                     <img
-                      src={`/assets/fabricas/${model.id}.webp`}
+                      src={asset(`/assets/fabricas/${model.id}.webp`)}
                       alt=""
                       loading="lazy"
                       className="aspect-square w-full object-contain"

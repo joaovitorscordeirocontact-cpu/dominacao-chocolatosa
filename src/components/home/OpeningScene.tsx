@@ -1,3 +1,4 @@
+import { asset } from "@/lib/assets";
 import Link from "next/link";
 import { ChocolateTide, ChocolateWave } from "@/components/ui/ChocolateWave";
 import styles from "./opening.module.css";
@@ -8,9 +9,9 @@ function Art() {
   return (
     <div className={styles.art} aria-hidden="true">
       <ChocolateTide className={styles.bottomWave} />
-      <img className={styles.left} src="/assets/abertura/lado-esquerdo.webp" alt="" width={560} height={736} fetchPriority="high" />
-      <img className={styles.right} src="/assets/abertura/lado-direito.webp" alt="" width={570} height={736} fetchPriority="high" />
-      <img className={styles.top} src="/assets/abertura/topo.webp" alt="" width={1672} height={270} />
+      <img className={styles.left} src={asset("/assets/abertura/lado-esquerdo.webp")} alt="" width={560} height={736} fetchPriority="high" />
+      <img className={styles.right} src={asset("/assets/abertura/lado-direito.webp")} alt="" width={570} height={736} fetchPriority="high" />
+      <img className={styles.top} src={asset("/assets/abertura/topo.webp")} alt="" width={1672} height={270} />
       <ChocolateWave className={styles.topWave} />
     </div>
   );
