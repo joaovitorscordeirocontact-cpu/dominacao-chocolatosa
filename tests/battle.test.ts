@@ -61,7 +61,7 @@ test("estado salvo sobrevive à ida e volta em JSON e descarta lixo", () => {
     battle: { started: true, representatives: { t1: "zzz" }, confirmed: {} },
     participation: { "t1-2": -3, "t1-3": 2 },
   });
-  assert.deepEqual(dirty.profile, { name: "", color: "rosa", accessories: { traje: "capa" } });
+  assert.deepEqual(dirty.profile, { name: "", color: "rosa", hairColor: "castanho", accessories: { traje: "capa" } });
   assert.equal(dirty.factory.model, "engrenagem");
   assert.equal(dirty.battle.started, false);
   assert.deepEqual(dirty.participation, { "t1-3": 2 });

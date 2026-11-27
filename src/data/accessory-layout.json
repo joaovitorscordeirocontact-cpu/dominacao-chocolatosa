@@ -1,20 +1,34 @@
 {
-  "stage": { "width": 640, "height": 740, "bodyX": 69, "bodyY": 150, "bodyWidth": 498, "bodyHeight": 576 },
-  "items": {
-    "coroa": { "cx": 253, "top": -78, "width": 192, "ratio": 0.7553, "z": 7 },
-    "chapeu-chef": { "cx": 253, "top": -122, "width": 256, "ratio": 0.8285, "z": 7 },
-    "bone": { "cx": 240, "top": -76, "width": 312, "ratio": 0.7301, "z": 7 },
-    "cartola": { "cx": 253, "top": -145, "width": 264, "ratio": 0.8, "z": 7 },
-    "aureola": { "cx": 253, "top": -118, "width": 220, "ratio": 0.4563, "z": 9 },
-    "cabelo-longo": { "cx": 253, "top": -40, "width": 504, "ratio": 0.945, "z": 6 },
-    "topete-loiro": { "cx": 266, "top": -62, "width": 326, "ratio": 0.7143, "z": 6 },
-    "bigode": { "cx": 253, "top": 163, "width": 100, "ratio": 0.348, "z": 4 },
-    "barba": { "cx": 253, "top": 156, "width": 224, "ratio": 0.8025, "z": 3 },
-    "oculos-redondos": { "cx": 253, "top": 99, "width": 298, "ratio": 0.439, "z": 5 },
-    "oculos-escuros": { "cx": 253, "top": 100, "width": 316, "ratio": 0.391, "z": 5 },
-    "monoculo": { "cx": 317, "top": 108, "width": 126, "ratio": 1.3224, "z": 5 },
-    "laco": { "cx": 372, "top": 8, "width": 150, "ratio": 0.7657, "z": 8 },
-    "gravata": { "cx": 253, "top": 262, "width": 150, "ratio": 0.5833, "z": 2 },
-    "capa": { "cx": 253, "top": 244, "width": 424, "ratio": 0.7262, "z": 1 }
+  "stage": { "width": 640, "height": 800, "bodyX": 69, "bodyY": 190, "bodyWidth": 498, "bodyHeight": 576 },
+  "bodyZ": 30,
+  "accessories": {
+    "coroa": [{ "asset": "coroa", "z": 60, "cx": 253, "top": -112, "width": 250, "ratio": 0.7463 }],
+    "chapeu-chef": [{ "asset": "chapeu-chef", "z": 60, "cx": 253, "top": -158, "width": 310, "ratio": 0.7521 }],
+    "cartola": [{ "asset": "cartola", "z": 60, "cx": 253, "top": -115, "width": 296, "ratio": 0.664 }],
+    "bone": [{ "asset": "bone", "z": 60, "cx": 240, "top": -102, "width": 312, "ratio": 0.7301 }],
+    "aureola": [{ "asset": "aureola", "z": 62, "cx": 253, "top": -118, "width": 220, "ratio": 0.4563 }],
+    "cabelo-curto": [{ "asset": "cabelo-curto", "tint": true, "z": 40, "cx": 253, "top": -44, "width": 316, "ratio": 0.6933 }],
+    "cabelo-cacheado": [{ "asset": "cabelo-cacheado", "tint": true, "z": 40, "cx": 253, "top": -54, "width": 340, "ratio": 0.6934 }],
+    "cabelo-longo": [
+      { "asset": "cabelo-longo-tras", "tint": true, "z": 20, "cx": 253, "top": -38, "width": 486, "ratio": 1.0336 },
+      { "asset": "cabelo-longo-frente", "tint": true, "z": 40, "cx": 253, "top": -30, "width": 372, "ratio": 0.9572 }
+    ],
+    "oculos-redondos": [{ "asset": "oculos-redondos", "z": 54, "cx": 253, "top": 99, "width": 298, "ratio": 0.439 }],
+    "oculos-escuros": [{ "asset": "oculos-escuros", "z": 54, "cx": 253, "top": 100, "width": 316, "ratio": 0.391 }],
+    "monoculo": [{ "asset": "monoculo", "z": 54, "cx": 317, "top": 108, "width": 126, "ratio": 1.3224 }],
+    "bigode": [{ "asset": "bigode", "z": 52, "cx": 253, "top": 163, "width": 100, "ratio": 0.348 }],
+    "barba": [{ "asset": "barba", "z": 50, "cx": 253, "top": 156, "width": 224, "ratio": 0.8025 }],
+    "laco": [{ "asset": "laco", "z": 65, "cx": 372, "top": 8, "width": 150, "ratio": 0.7657 }],
+    "gravata": [{ "asset": "gravata", "z": 45, "cx": 253, "top": 262, "width": 150, "ratio": 0.5833 }],
+    "capa": [
+      { "asset": "capa-tras", "z": 10, "cx": 253, "top": 196, "width": 584, "ratio": 0.694 },
+      { "asset": "capa-fecho", "z": 70, "cx": 253, "top": 238, "width": 300, "ratio": 0.3902 }
+    ]
+  },
+  "hairUnderHat": {
+    "coroa": [[-80, 168], [48, 140], [92, 108], [116, 74], [150, 56], [356, 56], [390, 74], [414, 108], [458, 140], [586, 168], [586, 720], [-80, 720]],
+    "chapeu-chef": [[-80, 168], [48, 140], [92, 108], [116, 74], [150, 54], [356, 54], [390, 74], [414, 108], [458, 140], [586, 168], [586, 720], [-80, 720]],
+    "cartola": [[-80, 168], [48, 140], [92, 108], [116, 68], [150, 46], [356, 46], [390, 68], [414, 108], [458, 140], [586, 168], [586, 720], [-80, 720]],
+    "bone": [[-80, 168], [48, 140], [92, 108], [116, 80], [150, 62], [356, 62], [390, 80], [414, 108], [458, 140], [586, 168], [586, 720], [-80, 720]]
   }
 }

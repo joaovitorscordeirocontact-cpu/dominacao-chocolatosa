@@ -23,13 +23,8 @@ ALFA_MIN, ALFA_MAX = 24, 244
 # componente conectado correspondente; o recorte usa os pixels do componente.
 PERSONAGEM = {
     "corpo": (22, 194, 512, 762),
-    "coroa": (531, 98, 760, 269),
-    "chapeu-chef": (778, 78, 1009, 268),
     "bone": (1029, 113, 1247, 270),
-    "cartola": (1268, 89, 1510, 281),
     "aureola": (1534, 153, 1732, 239),
-    "cabelo-longo": (512, 330, 778, 580),
-    "topete-loiro": (779, 339, 1002, 496),
     "bigode": (1035, 423, 1231, 486),
     "oculos-redondos": (1262, 390, 1500, 490),
     "oculos-escuros": (1522, 403, 1757, 490),
@@ -37,7 +32,32 @@ PERSONAGEM = {
     "monoculo": (796, 624, 940, 817),
     "barba": (985, 647, 1215, 830),
     "gravata": (1246, 659, 1442, 770),
-    "capa": (1452, 598, 1769, 826),
+}
+
+# Folha nova (itens.PNG), da esquerda para a direita, linha a linha.
+ACESSORIOS = {
+    "coroa": (68, 109, 395, 351),
+    "chapeu-chef": (448, 87, 803, 352),
+    "cartola": (840, 109, 1210, 352),
+    "capa-tras": (419, 832, 836, 1192),
+    "capa-fecho": (913, 950, 1151, 1039),
+}
+
+CABELOS = {
+    "cabelo-curto": (75, 475, 393, 693),
+    "cabelo-cacheado": (455, 466, 796, 700),
+    "cabelo-longo-frente": (869, 466, 1188, 771),
+    "cabelo-longo-tras": (48, 832, 398, 1193),
+}
+
+# Cada cor é um degradê (sombra, base, brilho) aplicado sobre a luminosidade
+# do cabelo cinza, o que preserva volume e brilho das mechas.
+CORES_CABELO = {
+    "preto": ((10, 7, 9), (46, 37, 41), (122, 106, 112)),
+    "vermelho": ((84, 14, 10), (186, 48, 28), (255, 142, 98)),
+    "branco": ((158, 146, 156), (230, 225, 231), (255, 255, 255)),
+    "loiro": ((146, 92, 24), (232, 183, 82), (255, 238, 176)),
+    "castanho": ((42, 19, 10), (108, 60, 33), (188, 130, 86)),
 }
 
 FABRICAS = {
@@ -193,6 +213,38 @@ def recolorir_corpo(corpo, caixa, cor):
     return saida
 
 
+def referencias_de_luma(pecas):
+    """Sombra, meio-tom e brilho medidos no conjunto de TODAS as peças de cabelo."""
+    lumas = sorted(luma(p) for peca in pecas for p in peca.get_flattened_data() if p[3] == 255)
+    return tuple(lumas[int((len(lumas) - 1) * q)] for q in (0.02, 0.58, 0.985))
+
+
+def recolorir_cabelo(peca, referencias, tons):
+    escuro, meio, claro = referencias
+    sombra, base, brilho = tons
+
+    def cor_para(l):
+        if l <= meio:
+            t = max(0.0, (l - escuro) / (meio - escuro))
+            a, b = sombra, base
+        else:
+            t = min(1.0, (l - meio) / (claro - meio))
+            a, b = base, brilho
+        return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
+    tabela = {}
+    saida = peca.copy()
+    destino = saida.load()
+    for indice, (r, g, b, a) in enumerate(peca.get_flattened_data()):
+        if a == 0:
+            continue
+        nivel = round(luma((r, g, b)))
+        if nivel not in tabela:
+            tabela[nivel] = cor_para(nivel)
+        destino[indice % peca.width, indice // peca.width] = tabela[nivel] + (a,)
+    return saida
+
+
 def salvar(img, caminho, qualidade=92):
     caminho.parent.mkdir(parents=True, exist_ok=True)
     img.save(caminho, "WEBP", quality=qualidade, alpha_quality=100, method=6)
@@ -233,6 +285,20 @@ def main():
         else:
             salvar(item, SAIDA / "personagem" / f"{nome}.webp")
         print(f"personagem/{nome}: {item.size}")
+
+    folha = limpar_alfa(Image.open(ORIGEM / "itens.PNG"))
+    comps = componentes(folha)
+    for nome, esperada in ACESSORIOS.items():
+        item, _ = isolar(folha, comps, esperada)
+        salvar(item, SAIDA / "personagem" / f"{nome}.webp")
+        print(f"personagem/{nome}: {item.size}")
+
+    cabelos = {nome: isolar(folha, comps, esperada)[0] for nome, esperada in CABELOS.items()}
+    referencias = referencias_de_luma(cabelos.values())
+    for nome, item in cabelos.items():
+        for cor_nome, tons in CORES_CABELO.items():
+            salvar(recolorir_cabelo(item, referencias, tons), SAIDA / "personagem" / f"{nome}-{cor_nome}.webp")
+        print(f"personagem/{nome} ({len(CORES_CABELO)} cores): {item.size}")
 
     folha = limpar_alfa(Image.open(ORIGEM / "fabricas-icones.png"))
     comps = componentes(folha)

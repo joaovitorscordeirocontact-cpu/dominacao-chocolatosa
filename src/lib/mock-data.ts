@@ -1,5 +1,5 @@
 /** Dados FICTÍCIOS da demonstração local. Nenhum participante é real. */
-import type { Accessories, BodyColor, DemoState, Participant, Team, TeamId } from "./types.ts";
+import type { Accessories, BodyColor, DemoState, HairColor, Participant, Team, TeamId } from "./types.ts";
 
 /** Id fixo do usuário, que é o capitão da equipe t1 na demonstração. */
 export const USER_ID = "t1-capitao";
@@ -10,8 +10,9 @@ function person(
   color: BodyColor,
   accessories: Accessories = {},
   isCaptain = false,
+  hairColor: HairColor = "castanho",
 ): Participant {
-  return { id, name, color, accessories, isCaptain };
+  return { id, name, color, hairColor, accessories, isCaptain };
 }
 
 /** Colegas fictícios da fábrica do usuário (o capitão vem do perfil salvo). */
@@ -35,7 +36,7 @@ const OTHER_TEAMS: FictionalTeam[] = [
       person("t2-1", "Rafa", "azul", { chapeu: "coroa", traje: "capa" }, true),
       person("t2-2", "Nina", "rosa", { chapeu: "chapeu-chef" }),
       person("t2-3", "Theo", "chocolate", { olhos: "oculos-escuros" }),
-      person("t2-4", "Manu", "branco", { cabelo: "topete-loiro" }),
+      person("t2-4", "Manu", "branco", { cabelo: "cabelo-curto" }, false, "loiro"),
       person("t2-5", "Igor", "verde", { pelos: "bigode", chapeu: "cartola" }),
     ],
   },
@@ -60,7 +61,7 @@ const OTHER_TEAMS: FictionalTeam[] = [
     participants: [
       person("t4-1", "Gui", "chocolate", { chapeu: "cartola", traje: "gravata" }, true),
       person("t4-2", "Mel", "branco", { chapeu: "bone" }),
-      person("t4-3", "Otto", "verde", { cabelo: "topete-loiro", olhos: "oculos-escuros" }),
+      person("t4-3", "Otto", "verde", { cabelo: "cabelo-cacheado", olhos: "oculos-escuros" }, false, "preto"),
       person("t4-4", "Isa", "azul", { traje: "capa" }),
       person("t4-5", "Noah", "rosa", { pelos: "bigode" }),
     ],
@@ -84,6 +85,7 @@ export function buildTeams({ profile, factory }: Pick<DemoState, "profile" | "fa
     id: USER_ID,
     name: profile.name.trim() || "Você",
     color: profile.color,
+    hairColor: profile.hairColor,
     accessories: profile.accessories,
     isCaptain: true,
   };

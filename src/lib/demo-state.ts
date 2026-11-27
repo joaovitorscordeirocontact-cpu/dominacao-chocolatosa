@@ -1,14 +1,12 @@
 import { belongsToTeam, createInitialBattle } from "./battle.ts";
 import {
   BACKGROUNDS,
-  BODY_COLORS,
   FACTORY_MODELS,
   FACTORY_NAME_MAX_LENGTH,
-  NAME_MAX_LENGTH,
-  SLOT_IDS,
   SLOTS,
   TEAM_IDS,
 } from "./catalog.ts";
+import { cleanName, DEFAULT_LOOK, isObject, sanitizeLook } from "./look.ts";
 import { INITIAL_PARTICIPATION } from "./mock-data.ts";
 import { createInitialStage, sanitizeStage } from "./stage.ts";
 import type {
@@ -18,37 +16,17 @@ import type {
   Battle,
   DemoState,
   FactoryIdentity,
-  MascotLook,
   Profile,
 } from "./types.ts";
 
 export function createDefaultState(): DemoState {
   return {
-    profile: { name: "", color: "rosa", accessories: {} },
+    profile: { name: "", ...DEFAULT_LOOK },
     factory: { name: "", model: "engrenagem", background: "palco-rosa" },
     battle: createInitialBattle(),
     participation: { ...INITIAL_PARTICIPATION },
     stage: createInitialStage(),
   };
-}
-
-export function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function cleanName(value: unknown, maxLength = NAME_MAX_LENGTH): string {
-  return typeof value === "string" ? value.slice(0, maxLength) : "";
-}
-
-function sanitizeLook(raw: Record<string, unknown>, fallback: MascotLook): MascotLook {
-  const color = BODY_COLORS.find((option) => option.id === raw.color)?.id ?? fallback.color;
-  const stored = isObject(raw.accessories) ? raw.accessories : {};
-  const accessories: Accessories = {};
-  for (const slot of SLOT_IDS) {
-    const item = SLOTS[slot].items.find((option) => option.id === stored[slot]);
-    if (item) accessories[slot] = item.id;
-  }
-  return { color, accessories };
 }
 
 function sanitizeFactory(raw: unknown, fallback: FactoryIdentity): FactoryIdentity {

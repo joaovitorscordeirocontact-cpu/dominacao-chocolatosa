@@ -1,25 +1,27 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import layout from "@/data/accessory-layout.json";
-import { BODY_COLORS, SLOT_IDS, SLOTS } from "@/lib/catalog";
+import { BODY_COLORS, HAIR_COLORS, SLOT_IDS, SLOTS } from "@/lib/catalog";
+import { asset } from "@/lib/assets";
+import { accessoryLayers, BODY_Z, percent, STAGE } from "@/lib/mascot-layers";
 import type { MascotLook } from "@/lib/types";
 
-const { stage, items } = layout;
-const percent = (value: number, total: number) => `${(value / total) * 100}%`;
-
-export function describeLook({ color, accessories }: MascotLook) {
+export function describeLook({ color, hairColor, accessories }: MascotLook) {
   const colorLabel = BODY_COLORS.find((option) => option.id === color)?.label.toLowerCase();
   const worn = SLOT_IDS.flatMap((slot) => {
     const item = SLOTS[slot].items.find((option) => option.id === accessories[slot]);
-    return item ? [item.label.toLowerCase()] : [];
+    if (!item) return [];
+    if (slot !== "cabelo") return [item.label.toLowerCase()];
+    const hair = HAIR_COLORS.find((option) => option.id === hairColor)?.label.toLowerCase();
+    return [`cabelo ${item.label.toLowerCase()} ${hair}`];
   });
   return `Mascote ${colorLabel}${worn.length ? ` com ${worn.join(", ")}` : ""}`;
 }
 
 /**
- * Mascote montado em camadas. Ocupa 100% da largura do contêiner na proporção
- * do palco definido em accessory-layout.json. Só o corpo muda de cor.
+ * Mascote montado em camadas, de trás para frente: capa, cabelo de trás, corpo,
+ * cabelo da frente, rosto, chapéu e fecho. Ocupa 100% da largura do contêiner na
+ * proporção do palco. A cor do corpo e a do cabelo são independentes.
  */
 export function Mascot({
   look,
@@ -30,19 +32,17 @@ export function Mascot({
   animated?: boolean;
   className?: string;
 }) {
-  const worn = SLOT_IDS.flatMap((slot) => look.accessories[slot] ?? []);
-
   return (
     <div
-      className={`relative w-full select-none ${className}`}
-      style={{ aspectRatio: `${stage.width} / ${stage.height}` }}
+      className={`relative isolate w-full select-none ${className}`}
+      style={{ aspectRatio: `${STAGE.width} / ${STAGE.height}` }}
       role="img"
       aria-label={describeLook(look)}
     >
       <motion.img
         // A troca de cor dá um pequeno "pulo" no corpo.
         key={look.color}
-        src={`/assets/personagem/corpo-${look.color}.webp`}
+        src={asset(`/assets/personagem/corpo-${look.color}.webp`)}
         alt=""
         draggable={false}
         initial={animated ? { scale: 0.95 } : false}
@@ -50,35 +50,37 @@ export function Mascot({
         transition={{ type: "spring", stiffness: 420, damping: 16 }}
         className="absolute h-auto"
         style={{
-          left: percent(stage.bodyX, stage.width),
-          top: percent(stage.bodyY, stage.height),
-          width: percent(stage.bodyWidth, stage.width),
+          left: percent(STAGE.bodyX, STAGE.width),
+          top: percent(STAGE.bodyY, STAGE.height),
+          width: percent(STAGE.bodyWidth, STAGE.width),
+          zIndex: BODY_Z,
           originY: 1,
         }}
       />
       <AnimatePresence initial={false}>
-        {worn.map((id) => {
-          const item = items[id];
-          return (
-            <motion.img
-              key={id}
-              src={`/assets/personagem/${id}.webp`}
-              alt=""
-              draggable={false}
-              initial={animated ? { opacity: 0, y: -14, scale: 0.8 } : false}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={animated ? { opacity: 0, scale: 0.8, transition: { duration: 0.15 } } : { opacity: 0, transition: { duration: 0 } }}
-              transition={{ type: "spring", stiffness: 380, damping: 20 }}
-              className="absolute h-auto"
-              style={{
-                left: percent(stage.bodyX + item.cx - item.width / 2, stage.width),
-                top: percent(stage.bodyY + item.top, stage.height),
-                width: percent(item.width, stage.width),
-                zIndex: item.z,
-              }}
-            />
-          );
-        })}
+        {accessoryLayers(look).map((layer) => (
+          <motion.img
+            // A cor não entra na chave: trocar a cor do cabelo não reanima a peça.
+            key={layer.key}
+            data-layer={layer.key}
+            src={asset(`/assets/personagem/${layer.file}.webp`)}
+            alt=""
+            draggable={false}
+            initial={animated ? { opacity: 0, y: -14, scale: 0.8 } : false}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, transition: { duration: animated ? 0.15 : 0 } }}
+            transition={{ type: "spring", stiffness: 380, damping: 20 }}
+            className="absolute"
+            style={{
+              left: percent(STAGE.bodyX + layer.left, STAGE.width),
+              top: percent(STAGE.bodyY + layer.top, STAGE.height),
+              width: percent(layer.width, STAGE.width),
+              height: percent(layer.height, STAGE.height),
+              zIndex: layer.z,
+              clipPath: layer.clipPath,
+            }}
+          />
+        ))}
       </AnimatePresence>
     </div>
   );

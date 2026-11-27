@@ -6,9 +6,57 @@ import { useState } from "react";
 import { Mascot } from "@/components/mascot/Mascot";
 import { Avatar } from "@/components/mascot/Avatar";
 import { ActionBar } from "@/components/ui/Screen";
-import { ACCESSORY_GROUPS, BODY_COLORS, NAME_MAX_LENGTH, SLOTS } from "@/lib/catalog";
+import { asset } from "@/lib/assets";
+import { ACCESSORY_GROUPS, BODY_COLORS, HAIR_COLORS, NAME_MAX_LENGTH, SLOT_IDS, SLOTS } from "@/lib/catalog";
 import { setAccessory, setProfile } from "@/lib/demo-state";
+import { accessoryLayers } from "@/lib/mascot-layers";
 import { updateDemo, useDemoState, useHydrated } from "@/lib/store";
+import type { AccessoryId, MascotLook, Profile } from "@/lib/types";
+
+/** Miniatura da peça: cabelo na cor escolhida; capa mostrando o tecido. */
+function thumbnail(id: AccessoryId, look: MascotLook): string {
+  const layers = accessoryLayers({ ...look, accessories: { [slotOf(id)]: id } });
+  return (id === "cabelo-longo" ? layers.at(-1) : layers[0])!.file;
+}
+
+const slotOf = (id: AccessoryId) => SLOT_IDS.find((slot) => SLOTS[slot].items.some((item) => item.id === id))!;
+
+function HairColorPicker({ profile }: { profile: Profile }) {
+  const hasHair = Boolean(profile.accessories.cabelo);
+  return (
+    <div className="mt-3" role="group" aria-label="Cor do cabelo">
+      <p className="mb-2 text-sm font-bold text-blush" aria-hidden="true">
+        Cor do cabelo{hasHair ? "" : " · escolha um cabelo primeiro"}
+      </p>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-3 lg:grid-cols-5">
+        {HAIR_COLORS.map((option) => {
+          const selected = profile.hairColor === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              aria-pressed={selected}
+              disabled={!hasHair}
+              onClick={() => updateDemo((state) => setProfile(state, { hairColor: option.id }))}
+              className={`flex min-h-16 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 text-xs font-bold transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 ${
+                selected ? "border-gold bg-gold/15" : "border-transparent bg-espresso/60"
+              }`}
+            >
+              <span
+                className="size-7 rounded-full shadow-[inset_0_-5px_7px_rgb(0_0_0/0.35),inset_0_3px_5px_rgb(255_255_255/0.4)] ring-1 ring-cream/50"
+                style={{ background: option.swatch }}
+              />
+              <span>
+                {selected && <span aria-hidden="true">✓ </span>}
+                {option.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function CharacterEditor() {
   const { profile } = useDemoState();
@@ -127,7 +175,7 @@ export function CharacterEditor() {
             <fieldset key={slot} className="mt-4">
               <legend className="mb-2 text-sm font-bold text-blush">{SLOTS[slot].label} · escolha um ou nenhum</legend>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
-                {[{ id: undefined, label: "Nenhum" }, ...SLOTS[slot].items].map((item) => {
+                {[{ id: undefined, label: slot === "cabelo" ? "Sem cabelo" : "Nenhum" }, ...SLOTS[slot].items].map((item) => {
                   const selected = profile.accessories[slot] === item.id;
                   return (
                     <button
@@ -145,7 +193,7 @@ export function CharacterEditor() {
                       <span className="flex h-14 w-full items-center justify-center">
                         {item.id ? (
                           <img
-                            src={`/assets/personagem/${item.id}.webp`}
+                            src={asset(`/assets/personagem/${thumbnail(item.id, profile)}.webp`)}
                             alt=""
                             loading="lazy"
                             className="max-h-full max-w-full object-contain"
@@ -167,6 +215,7 @@ export function CharacterEditor() {
                   );
                 })}
               </div>
+              {slot === "cabelo" && <HairColorPicker profile={profile} />}
             </fieldset>
           ))}
         </div>

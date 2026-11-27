@@ -1,9 +1,9 @@
-import layout from "@/data/accessory-layout.json";
+import { STAGE } from "@/lib/mascot-layers";
 import type { MascotLook } from "@/lib/types";
 import { Mascot } from "./Mascot";
 
 /** Região quadrada do palco mostrada no círculo: cabeça, acessórios e tronco. */
-const CROP = { x: 31, y: 6, size: 580 };
+const CROP = { x: 4, y: 14, size: 636 };
 
 export function Avatar({ look, className = "size-16" }: { look: MascotLook; className?: string }) {
   return (
@@ -13,7 +13,7 @@ export function Avatar({ look, className = "size-16" }: { look: MascotLook; clas
       <span
         className="absolute block"
         style={{
-          width: `${(layout.stage.width / CROP.size) * 100}%`,
+          width: `${(STAGE.width / CROP.size) * 100}%`,
           left: `${(-CROP.x / CROP.size) * 100}%`,
           top: `${(-CROP.y / CROP.size) * 100}%`,
         }}

@@ -1,5 +1,8 @@
 export type BodyColor = "azul" | "verde" | "rosa" | "chocolate" | "branco" | "marrom";
 
+/** Cor do cabelo, independente da cor do corpo. */
+export type HairColor = "preto" | "vermelho" | "branco" | "loiro" | "castanho";
+
 /** Cada espaço aceita um acessório por vez; espaços diferentes se combinam. */
 export type AccessorySlot = "chapeu" | "cabelo" | "olhos" | "pelos" | "traje" | "enfeite";
 
@@ -9,8 +12,9 @@ export type AccessoryId =
   | "bone"
   | "cartola"
   | "aureola"
+  | "cabelo-curto"
+  | "cabelo-cacheado"
   | "cabelo-longo"
-  | "topete-loiro"
   | "oculos-redondos"
   | "oculos-escuros"
   | "monoculo"
@@ -24,6 +28,7 @@ export type Accessories = Partial<Record<AccessorySlot, AccessoryId>>;
 
 export type MascotLook = {
   color: BodyColor;
+  hairColor: HairColor;
   accessories: Accessories;
 };
 

@@ -4,6 +4,7 @@ import type {
   BackgroundId,
   BodyColor,
   FactoryModelId,
+  HairColor,
   TeamId,
 } from "./types.ts";
 
@@ -14,6 +15,14 @@ export const BODY_COLORS: { id: BodyColor; label: string; swatch: string }[] = [
   { id: "chocolate", label: "Chocolate", swatch: "#683824" },
   { id: "branco", label: "Branco", swatch: "#eee3dd" },
   { id: "marrom", label: "Marrom", swatch: "#b2703e" },
+];
+
+export const HAIR_COLORS: { id: HairColor; label: string; swatch: string }[] = [
+  { id: "preto", label: "Preto", swatch: "#2e2529" },
+  { id: "vermelho", label: "Vermelho", swatch: "#ba301c" },
+  { id: "branco", label: "Branco", swatch: "#e6e1e7" },
+  { id: "loiro", label: "Loiro", swatch: "#e8b752" },
+  { id: "castanho", label: "Castanho", swatch: "#6c3c21" },
 ];
 
 export const SLOTS: Record<AccessorySlot, { label: string; items: { id: AccessoryId; label: string }[] }> = {
@@ -30,8 +39,9 @@ export const SLOTS: Record<AccessorySlot, { label: string; items: { id: Accessor
   cabelo: {
     label: "Cabelo",
     items: [
-      { id: "cabelo-longo", label: "Cabelo ondulado" },
-      { id: "topete-loiro", label: "Topete loiro" },
+      { id: "cabelo-curto", label: "Curto de lado" },
+      { id: "cabelo-cacheado", label: "Cacheado" },
+      { id: "cabelo-longo", label: "Longo" },
     ],
   },
   olhos: {
